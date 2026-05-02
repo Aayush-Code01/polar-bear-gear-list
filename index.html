@@ -86,6 +86,17 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #110086; border-radius: 10px; }
+
+        /* Shimmer loading effect */
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body class="pb-32 sm:pb-40">
@@ -127,12 +138,20 @@
         <!-- Category Tabs -->
         <div class="sticky top-16 sm:top-20 z-30 bg-[#fcfcfd]/80 backdrop-blur-md -mx-4 px-4 py-4 sm:-mx-6 sm:px-6">
             <div id="tabs-container" class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-2">
-                <!-- Tabs injected by JS -->
+                <!-- Shimmer Loading for Tabs -->
+                <div class="h-8 w-24 rounded-full shimmer opacity-50"></div>
+                <div class="h-8 w-32 rounded-full shimmer opacity-50"></div>
+                <div class="h-8 w-20 rounded-full shimmer opacity-50"></div>
             </div>
         </div>
 
         <div id="inventory-container" class="space-y-10 sm:space-y-16 mt-6">
-            <!-- Content will be injected here by JS -->
+            <!-- Shimmer Loading for Items -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="h-20 rounded-2xl shimmer opacity-30"></div>
+                <div class="h-20 rounded-2xl shimmer opacity-30"></div>
+                <div class="h-20 rounded-2xl shimmer opacity-30"></div>
+            </div>
         </div>
     </main>
 
@@ -165,132 +184,64 @@
     </div>
 
     <script>
-        const inventoryData = [
-            {
-                id: "ronin-2",
-                category: "Ronin 2 Gimbal System",
-                items: [
-                    { name: "Ronin 2 Gimbal", qty: 1 },
-                    { name: "DJI Joystick Control", qty: 1 },
-                    { name: "DJI Force Pro (Mimic) w/ Ext. Cable", qty: 1 },
-                    { name: "DJI Extra Antenna", qty: 6 },
-                    { name: "DJI TB 50 Batteries", qty: 8 },
-                    { name: "DJI Charging Hub", qty: 1 },
-                    { name: "Alexa 35 Power Cable (Dual TB50)", qty: 1 },
-                    { name: "Sony Venice 1 & 2 Power Cable", qty: 1 },
-                    { name: "ARRI Alexa Mini Power Cable", qty: 1 },
-                    { name: "ARRI Alexa Mini Start/Stop", qty: 1 },
-                    { name: "RED Power Cable", qty: 1 },
-                    { name: "RED RCP Control Cable", qty: 1 },
-                    { name: "Ronin 2 Power Cable", qty: 1 },
-                    { name: "2-pin Power Cable", qty: 1 },
-                    { name: "DC Power Cable", qty: 1 },
-                    { name: "Triple P-TAP Breakout Box", qty: 1 },
-                    { name: "SDI IN/OUT Cables", qty: 2 },
-                    { name: "BNC Cables", qty: 10 },
-                    { name: "Allen Key Setup (inch/mm)", qty: 1 },
-                    { name: "DJI Top Plate & Universal Mount", qty: 1 },
-                    { name: "DJI 15mm Rods & Mounts", qty: 2 },
-                    { name: "Small Rig Magic Arms", qty: 16 },
-                    { name: "Kaushal Classic Handle Bar", qty: 1 },
-                    { name: "Kaushal U-Stand", qty: 1 },
-                    { name: "Kaushal Alexa 35 Adapter Plate", qty: 2 },
-                    { name: "Kaushal Vibration Isolator", qty: 1 },
-                    { name: "High Bright Monitor - 7 inch", qty: 1 }
-                ]
-            },
-            {
-                id: "control-gears",
-                category: "Control Gears & Nodo",
-                items: [
-                    { name: "Nodo Inertia Wheels 2-Axis", qty: 1 },
-                    { name: "DJI Master Wheels - 3 Axis", qty: 1 },
-                    { name: "DJI Video Transmission", qty: 1 },
-                    { name: "DJI Force Pro", qty: 1 },
-                    { name: "Inertia Wheels Wireless Receiver", qty: 1 },
-                    { name: "Wheels Base (Mitchell & Euro)", qty: 1 },
-                    { name: "V-Mount Battery Supply (Wheels)", qty: 1 }
-                ]
-            },
-            {
-                id: "support-vests",
-                category: "Support Vests & Rigs",
-                items: [
-                    { name: "Tilta Armour Man 2 Setup", qty: 1 },
-                    { name: "Ready Rig GS + Pro Arm", qty: 1 },
-                    { name: "Vega V2 Upgrade", qty: 2 },
-                    { name: "Cobra Quick Connect V2", qty: 2 },
-                    { name: "Locking Quick Connect", qty: 1 },
-                    { name: "Universal Gimbal Straps", qty: 2 }
-                ]
-            },
-            {
-                id: "stabilization",
-                category: "Specialized Rigs",
-                items: [
-                    { name: "Custom Easy Raptor Magnet", qty: 1 },
-                    { name: "Blackarm Complete (11-70 lbs)", qty: 1 },
-                    { name: "Anti Vibration Mount (Tranquilizer)", qty: 1 },
-                    { name: "Multi Angle Mitchell Mount", qty: 1 },
-                    { name: "Mitchell Accessories for Freefly", qty: 1 }
-                ]
-            },
-            {
-                id: "transmission",
-                category: "Video Transmission",
-                items: [
-                    { name: "DJI Video Transmitter", qty: 1 },
-                    { name: "DJI High Bright Remote Monitor", qty: 1 },
-                    { name: "NP-F Battery Adapters (TX/RX)", qty: 2 },
-                    { name: "WB37 Intelligent Batteries", qty: 2 },
-                    { name: "Ronin 4D Hand Grips Combo", qty: 1 },
-                    { name: "Remote Monitor Side Handle", qty: 1 }
-                ]
-            },
-            {
-                id: "ronin-4d",
-                category: "Ronin 4D Flex 8K",
-                items: [
-                    { name: "Hasselblad Zenmuse 8K Camera", qty: 1 },
-                    { name: "4D Flex Extension Setup", qty: 1 },
-                    { name: "Tilta Full Camera Cage", qty: 1 },
-                    { name: "DJI High Bright Monitor 7 inch", qty: 3 },
-                    { name: "DJI Focus Pro Full Kit (LIDAR)", qty: 1 },
-                    { name: "1TB PRO SSD Cards", qty: 3 },
-                    { name: "DZO Octopus Adapter (PL to DX)", qty: 1 },
-                    { name: "X9 E Mount Unit", qty: 1 },
-                    { name: "Carbon Fiber Monopod", qty: 1 },
-                    { name: "4D SDI/XLR Expansion Plate", qty: 1 },
-                    { name: "Wooden Side Handle", qty: 1 }
-                ]
-            },
-            {
-                id: "lenses",
-                category: "Lens Compatibility",
-                items: [
-                    { name: "Cooke SP3 Prime Set", qty: 1 },
-                    { name: "Carl Zeiss Batis/Milvus Set", qty: 1 },
-                    { name: "Sony G Master Prime Set", qty: 1 },
-                    { name: "Laowa Nanomorph (27, 35, 50)", qty: 1 },
-                    { name: "Zeiss Nano Prime (24, 35, 50)", qty: 1 },
-                    { name: "DZO Vespid Prime & Retro", qty: 1 },
-                    { name: "Zeiss Super Speed Set", qty: 1 },
-                    { name: "NiSi Athena Prime Set", qty: 1 },
-                    { name: "Kowa Anamorphic Set", qty: 1 },
-                    { name: "Blazar Remus/Mantis Anamorphic", qty: 1 }
-                ]
-            },
-            {
-                id: "communication",
-                category: "Communication",
-                items: [
-                    { name: "Hollyland Talkback System", qty: 4 }
-                ]
-            }
-        ];
+        // Google Sheet CSV Export URL (Make sure the sheet is shared as "Anyone with the link can view")
+        const SHEET_ID = '1_AvwvVEFlmxadelY73dG6u1QP1LCKLzEnz3EzWcvlMQ';
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
+        let inventoryData = [];
         let selectedItems = new Set();
         let activeCategory = 'all';
+
+        // Function to parse CSV into grouped inventory data
+        async function fetchInventory() {
+            try {
+                const response = await fetch(CSV_URL);
+                const csvText = await response.text();
+                
+                // Simple CSV parser
+                const rows = csvText.split('\n').map(row => {
+                    // Match commas but ignore those inside quotes
+                    const matches = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    return matches ? matches.map(m => m.replace(/^"|"$/g, '')) : [];
+                }).filter(row => row.length >= 2);
+
+                const rawItems = [];
+                // Skip header if it exists (checks if row 0 looks like a header)
+                const startIdx = rows[0][0].toLowerCase().includes('category') ? 1 : 0;
+
+                for (let i = startIdx; i < rows.length; i++) {
+                    const [category, name, qty] = rows[i];
+                    if (category && name) {
+                        rawItems.push({ category, name, qty: qty || '1' });
+                    }
+                }
+
+                // Group by category
+                const groups = {};
+                rawItems.forEach(item => {
+                    if (!groups[item.category]) {
+                        groups[item.category] = {
+                            id: item.category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                            category: item.category,
+                            items: []
+                        };
+                    }
+                    groups[item.category].items.push({ name: item.name, qty: item.qty });
+                });
+
+                inventoryData = Object.values(groups);
+                renderTabs();
+                renderInventory();
+            } catch (error) {
+                console.error('Error fetching inventory:', error);
+                document.getElementById('inventory-container').innerHTML = `
+                    <div class="text-center py-20 bg-red-50 rounded-3xl border border-red-100">
+                        <p class="text-red-600 font-bold">Unable to load inventory.</p>
+                        <p class="text-xs text-red-400 mt-2">Check if the spreadsheet is shared as "Public".</p>
+                    </div>
+                `;
+            }
+        }
 
         function renderTabs() {
             const tabsContainer = document.getElementById('tabs-container');
@@ -311,7 +262,6 @@
             renderTabs();
             renderInventory();
             
-            // Scroll to the top of the inventory container for better UX
             if (id !== 'all') {
                 const target = document.getElementById(`section-${id}`);
                 if (target) {
@@ -329,6 +279,8 @@
                 ? inventoryData 
                 : inventoryData.filter(cat => cat.id === activeCategory);
 
+            if (filteredData.length === 0) return;
+
             container.innerHTML = filteredData.map((cat, catIdx) => `
                 <section id="section-${cat.id}">
                     <div class="flex items-end justify-between mb-4 sm:mb-8 border-b-2 border-slate-50 pb-3 sm:pb-4">
@@ -339,14 +291,14 @@
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                         ${cat.items.map((item, itemIdx) => {
-                            const itemId = `item-${catIdx}-${itemIdx}`;
+                            const uniqueId = `item-${cat.id}-${itemIdx}`;
                             const isChecked = selectedItems.has(item.name);
                             return `
                                 <div class="relative group">
-                                    <input type="checkbox" id="${itemId}" class="hidden" 
+                                    <input type="checkbox" id="${uniqueId}" class="hidden" 
                                            ${isChecked ? 'checked' : ''}
-                                           onchange="toggleItem('${itemId}', '${item.name}')">
-                                    <label for="${itemId}" class="item-card flex items-center justify-between p-3 sm:p-5 bg-white border border-slate-200 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 transition-all select-none">
+                                           onchange="toggleItem('${uniqueId}', '${item.name}')">
+                                    <label for="${uniqueId}" class="item-card flex items-center justify-between p-3 sm:p-5 bg-white border border-slate-200 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 transition-all select-none">
                                         <div class="flex items-center space-x-3 sm:space-x-4">
                                             <div class="check-icon ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all text-brand shrink-0">
                                                 <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
@@ -391,7 +343,7 @@
             selectedItems.clear();
             document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateInquiryBar();
-            renderInventory(); // Refresh visual state if filtered
+            renderInventory(); 
         }
 
         function generateListString() {
@@ -411,10 +363,7 @@
             window.location.href = `mailto:himanshusharma280@gmail.com?subject=${subject}&body=${body}`;
         }
 
-        window.onload = () => {
-            renderTabs();
-            renderInventory();
-        };
+        window.onload = fetchInventory;
     </script>
 </body>
 </html>
