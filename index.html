@@ -87,7 +87,6 @@
             100% { background-position: -200% 0; }
         }
 
-        /* Custom dropdown arrow removal for cleaner look */
         select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23110086'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -112,7 +111,7 @@
             </div>
             
             <div class="flex items-center">
-                <a href="tel:+919650563719" class="flex items-center space-x-2 px-3 py-1.5 bg-brand/5 rounded-lg hover:bg-brand/10 transition-colors group">
+                <a href="tel:+919650563719" class="flex items-center space-x-2 px-3 py-1.5 bg-brand/5 rounded-xl hover:bg-brand/10 transition-colors group">
                     <svg class="w-3.5 h-3.5 text-brand group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
                     </svg>
@@ -239,7 +238,7 @@
                 const qtyIdx = headers.indexOf('qty');
 
                 if (catIdx === -1 || descIdx === -1) {
-                    throw new Error('Required headers "Category" and "Description" not found in the first row of "Live" tab.');
+                    throw new Error('Required headers "Category" and "Description" not found.');
                 }
 
                 const rawItems = [];
@@ -255,8 +254,6 @@
                         rawItems.push({ category, name: description, qty });
                     }
                 }
-
-                if (rawItems.length === 0) throw new Error('No valid gear items found in the "Live" tab.');
 
                 const groups = {};
                 rawItems.forEach(item => {
@@ -275,30 +272,22 @@
                 renderInventory();
             } catch (error) {
                 console.error('Fetch error:', error);
-                document.getElementById('inventory-container').innerHTML = `
-                    <div class="text-center py-12 px-6 bg-red-50 rounded-2xl border border-red-100 max-w-lg mx-auto">
-                        <p class="text-red-700 font-bold text-lg mb-2">Sync Error</p>
-                        <p class="text-sm text-red-600 mb-4">${error.message}</p>
-                    </div>
-                `;
+                document.getElementById('inventory-container').innerHTML = `<p class="text-center text-red-500 py-10">${error.message}</p>`;
             }
         }
 
         function populateDropdown() {
             const select = document.getElementById('category-select');
-            // Keep "All Inventory" as the first option
             const currentOptions = '<option value="all">All Inventory</option>';
             const categoryOptions = inventoryData.map(cat => `
                 <option value="${cat.id}">${cat.category}</option>
             `).join('');
-            
             select.innerHTML = currentOptions + categoryOptions;
         }
 
         function setActiveCategory(id) {
             activeCategory = id;
             renderInventory();
-            
             if (id !== 'all') {
                 const target = document.getElementById(`section-${id}`);
                 if (target) {
@@ -312,6 +301,28 @@
             }
         }
 
+        /**
+         * Selects or deselects all items in a specific category
+         */
+        function toggleCategory(catId) {
+            const category = inventoryData.find(c => c.id === catId);
+            if (!category) return;
+
+            const allNames = category.items.map(i => i.name);
+            const allSelected = allNames.every(name => selectedItems.has(name));
+
+            if (allSelected) {
+                // Deselect all
+                allNames.forEach(name => selectedItems.delete(name));
+            } else {
+                // Select all
+                allNames.forEach(name => selectedItems.add(name));
+            }
+
+            renderInventory();
+            updateInquiryBar();
+        }
+
         function renderInventory() {
             const container = document.getElementById('inventory-container');
             const filteredData = activeCategory === 'all' 
@@ -319,17 +330,29 @@
                 : inventoryData.filter(cat => cat.id === activeCategory);
 
             if (filteredData.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 py-10 px-2 text-sm italic">No items found.</p>';
+                container.innerHTML = '<p class="text-center text-slate-400 py-10">No items found.</p>';
                 return;
             }
 
-            container.innerHTML = filteredData.map((cat) => `
+            container.innerHTML = filteredData.map((cat) => {
+                const allSelected = cat.items.every(i => selectedItems.has(i.name));
+                return `
                 <section id="section-${cat.id}" class="px-1">
-                    <div class="flex items-end justify-between mb-4 sm:mb-8 border-b-2 border-slate-50 pb-3 sm:pb-4">
-                        <h3 class="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                            ${cat.category}
-                        </h3>
-                        <span class="text-[9px] sm:text-[10px] font-black text-brand tracking-[0.1em] uppercase bg-brand/5 px-2 py-1 rounded-md mb-0.5 whitespace-nowrap shrink-0 ml-4">${cat.items.length} Units</span>
+                    <div class="flex items-center justify-between mb-4 sm:mb-8 border-b-2 border-slate-50 pb-3 sm:pb-4">
+                        <div class="flex-1">
+                            <h3 class="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                ${cat.category}
+                            </h3>
+                            <div class="flex items-center space-x-3 mt-1">
+                                <span class="text-[9px] sm:text-[10px] font-black text-brand tracking-[0.1em] uppercase bg-brand/5 px-2 py-1 rounded-md whitespace-nowrap">${cat.items.length} Units</span>
+                            </div>
+                        </div>
+                        <button onclick="toggleCategory('${cat.id}')" 
+                                class="flex items-center space-x-2 px-3 py-2 rounded-xl border-2 transition-all active:scale-95
+                                ${allSelected ? 'bg-brand border-brand text-white' : 'bg-white border-slate-100 text-slate-500 hover:border-brand/40'}">
+                            <span class="text-[10px] font-black uppercase tracking-wider">${allSelected ? 'Clear Kit' : 'Select Kit'}</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        </button>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                         ${cat.items.map((item, itemIdx) => {
@@ -356,7 +379,7 @@
                         }).join('')}
                     </div>
                 </section>
-            `).join('');
+            `;}).join('');
         }
 
         function toggleItem(id, name) {
@@ -366,14 +389,13 @@
                 selectedItems.add(name);
             }
             updateInquiryBar();
+            renderInventory(); // Re-render to update the "Select Kit" button state
         }
 
         function updateInquiryBar() {
             const bar = document.getElementById('inquiry-bar');
             const countEl = document.getElementById('selected-count');
-            
             countEl.textContent = selectedItems.size;
-            
             if (selectedItems.size > 0) {
                 bar.classList.add('visible');
             } else {
