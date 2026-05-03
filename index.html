@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Gear Inventory | Polar Bear Films</title>
     
     <!-- Favicon -->
@@ -179,14 +179,16 @@
                     <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-brand dark:group-focus-within:text-blue-500 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
+                    <!-- text-base (16px) is used here to prevent auto-zoom on mobile focus -->
                     <input type="text" id="gear-search" oninput="handleSearch(this.value)" placeholder="Search gear (e.g. Ronin 2, Alexa Mini...)" 
-                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400">
+                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-base sm:text-sm font-semibold rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400">
                 </div>
 
                 <!-- Category Dropdown -->
                 <div class="flex items-center gap-3">
                     <div class="flex-1">
-                        <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
+                        <!-- text-base (16px) is used here to prevent auto-zoom on mobile focus -->
+                        <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-base sm:text-xs font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
                             <option value="all">All Categories</option>
                         </select>
                     </div>
@@ -456,6 +458,7 @@
                                            onchange="toggleItem('${uniqueId}', '${item.name.replace(/'/g, "\\'")}')">
                                     <label for="${uniqueId}" class="item-card flex flex-row items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors h-full">
                                         <div class="flex items-center space-x-1.5 sm:space-x-4 min-w-0 flex-1">
+                                            <!-- Greyed out check mark for guidance -->
                                             <div class="check-icon transition-all shrink-0 
                                                 ${isChecked ? 'opacity-100 scale-100 text-brand dark:text-blue-400' : 'opacity-20 scale-100 text-slate-400 dark:text-slate-600'}">
                                                 <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
