@@ -11,6 +11,7 @@
     <!-- Meta Tags for Social Media / WhatsApp Sharing -->
     <meta property="og:title" content="Gear Inventory | Polar Bear Films">
     <meta property="og:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
+    <!-- Updated Social Share Image with Direct Access URL -->
     <meta property="og:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -135,6 +136,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
             <div class="flex items-center">
                 <div class="h-8 sm:h-12 w-auto flex items-center">
+                    <!-- Logo with filter for Dark Mode to make it white -->
                     <img src="https://lh3.googleusercontent.com/d/18GG_sRWwFyK_or7uQDR2FE4oItbIpEZ1" 
                          alt="Polar Bear Films" 
                          class="h-full object-contain transition-all dark:[filter:brightness(0)_invert(1)]"
@@ -143,6 +145,7 @@
             </div>
             
             <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Theme Toggle -->
                 <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group" title="Toggle Theme">
                     <svg id="sun-icon" class="w-5 h-5 text-brand dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
                     <svg id="moon-icon" class="w-5 h-5 text-slate-300 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
@@ -175,12 +178,14 @@
                 <label for="category-select" class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Filter by category</label>
                 <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm font-bold rounded-xl px-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
                     <option value="all">All Inventory</option>
+                    <!-- Options injected by JS -->
                 </select>
             </div>
         </div>
 
         <div id="inventory-container" class="space-y-10 sm:space-y-16 mt-6 sm:mt-10">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="h-16 rounded-2xl shimmer opacity-30"></div>
                 <div class="h-16 rounded-2xl shimmer opacity-30"></div>
                 <div class="h-16 rounded-2xl shimmer opacity-30"></div>
                 <div class="h-16 rounded-2xl shimmer opacity-30"></div>
@@ -221,9 +226,10 @@
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
 
         let inventoryData = [];
-        let selectedItems = new Set(); // Stores unique keys "categoryName|itemName"
+        let selectedItems = new Set();
         let activeCategory = 'all';
 
+        // Dark Mode Logic
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -247,20 +253,33 @@
             let row = [];
             let cur = '';
             let inQuote = false;
+            
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 let next = text[i + 1];
-                if (char === '"' && inQuote && next === '"') { cur += '"'; i++; }
-                else if (char === '"') { inQuote = !inQuote; }
-                else if (char === ',' && !inQuote) { row.push(cur.trim()); cur = ''; }
-                else if ((char === '\r' || char === '\n') && !inQuote) {
+                
+                if (char === '"' && inQuote && next === '"') {
+                    cur += '"';
+                    i++;
+                } else if (char === '"') {
+                    inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) {
+                    row.push(cur.trim());
+                    cur = '';
+                } else if ((char === '\r' || char === '\n') && !inQuote) {
                     row.push(cur.trim());
                     if (row.length > 0) rows.push(row);
-                    row = []; cur = '';
+                    row = [];
+                    cur = '';
                     if (char === '\r' && next === '\n') i++;
-                } else { cur += char; }
+                } else {
+                    cur += char;
+                }
             }
-            if (cur !== '' || row.length > 0) { row.push(cur.trim()); rows.push(row); }
+            if (cur !== '' || row.length > 0) {
+                row.push(cur.trim());
+                rows.push(row);
+            }
             return rows;
         }
 
@@ -270,6 +289,7 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const csvText = await response.text();
                 const rows = parseCSV(csvText);
+                
                 if (rows.length < 1) throw new Error('Empty spreadsheet');
 
                 const headers = rows[0].map(h => h.toLowerCase().trim());
@@ -277,15 +297,19 @@
                 const descIdx = headers.indexOf('description');
                 const qtyIdx = headers.indexOf('qty');
 
-                if (catIdx === -1 || descIdx === -1) throw new Error('Headers "Category" and "Description" not found.');
+                if (catIdx === -1 || descIdx === -1) {
+                    throw new Error('Required headers "Category" and "Description" not found.');
+                }
 
                 const rawItems = [];
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || row.length <= Math.max(catIdx, descIdx)) continue;
+                    
                     const category = row[catIdx];
                     const description = row[descIdx];
                     const qty = (qtyIdx !== -1 && row[qtyIdx]) ? row[qtyIdx] : '1';
+                    
                     if (category && description && isNaN(category)) {
                         rawItems.push({ category, name: description, qty });
                     }
@@ -315,7 +339,9 @@
         function populateDropdown() {
             const select = document.getElementById('category-select');
             const currentOptions = '<option value="all">All Inventory</option>';
-            const categoryOptions = inventoryData.map(cat => `<option value="${cat.id}">${cat.category}</option>`).join('');
+            const categoryOptions = inventoryData.map(cat => `
+                <option value="${cat.id}">${cat.category}</option>
+            `).join('');
             select.innerHTML = currentOptions + categoryOptions;
         }
 
@@ -330,38 +356,41 @@
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                 }
-            } else { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         function toggleCategory(catId) {
             const category = inventoryData.find(c => c.id === catId);
             if (!category) return;
-            const itemKeys = category.items.map(i => `${category.category}|${i.name}`);
-            const allSelected = itemKeys.every(key => selectedItems.has(key));
-            if (allSelected) { itemKeys.forEach(key => selectedItems.delete(key)); } 
-            else { itemKeys.forEach(key => selectedItems.add(key)); }
-            renderInventory();
-            updateInquiryBar();
-        }
 
-        function toggleItem(catName, itemName) {
-            const key = `${catName}|${itemName}`;
-            if (selectedItems.has(key)) { selectedItems.delete(key); } 
-            else { selectedItems.add(key); }
-            updateInquiryBar();
+            const allNames = category.items.map(i => i.name);
+            const allSelected = allNames.every(name => selectedItems.has(name));
+
+            if (allSelected) {
+                allNames.forEach(name => selectedItems.delete(name));
+            } else {
+                allNames.forEach(name => selectedItems.add(name));
+            }
+
             renderInventory();
+            updateInquiryBar();
         }
 
         function renderInventory() {
             const container = document.getElementById('inventory-container');
-            const filteredData = activeCategory === 'all' ? inventoryData : inventoryData.filter(cat => cat.id === activeCategory);
+            const filteredData = activeCategory === 'all' 
+                ? inventoryData 
+                : inventoryData.filter(cat => cat.id === activeCategory);
+
             if (filteredData.length === 0) {
                 container.innerHTML = '<p class="text-center text-slate-400 dark:text-slate-500 py-10">No items found.</p>';
                 return;
             }
 
             container.innerHTML = filteredData.map((cat) => {
-                const allSelected = cat.items.every(i => selectedItems.has(`${cat.category}|${i.name}`));
+                const allSelected = cat.items.every(i => selectedItems.has(i.name));
                 return `
                 <section id="section-${cat.id}" class="px-1">
                     <div class="flex items-center justify-between mb-4 sm:mb-8 border-b-2 border-slate-50 dark:border-slate-800 pb-3 sm:pb-4 transition-colors">
@@ -380,77 +409,80 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         </button>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+                    <!-- Updated Grid for 2 columns on mobile -->
+                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                         ${cat.items.map((item, itemIdx) => {
-                            const isChecked = selectedItems.has(`${cat.category}|${item.name}`);
-                            const itemId = `item-${cat.id}-${itemIdx}`;
+                            const uniqueId = `item-${cat.id}-${itemIdx}`;
+                            const isChecked = selectedItems.has(item.name);
                             return `
                                 <div class="relative group">
-                                    <input type="checkbox" id="${itemId}" class="hidden" ${isChecked ? 'checked' : ''} onchange="toggleItem('${cat.category}', '${item.name.replace(/'/g, "\\'")}')">
-                                    <label for="${itemId}" class="item-card flex items-center justify-between p-3.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors">
-                                        <div class="flex items-center space-x-3 sm:space-x-4 pr-2">
+                                    <input type="checkbox" id="${uniqueId}" class="hidden" 
+                                           ${isChecked ? 'checked' : ''}
+                                           onchange="toggleItem('${uniqueId}', '${item.name.replace(/'/g, "\\'")}')">
+                                    <!-- Reduced padding on mobile to accommodate 2 columns -->
+                                    <label for="${uniqueId}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors">
+                                        <div class="flex items-center space-x-2 sm:space-x-4 pr-1 min-w-0">
                                             <div class="check-icon ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all text-brand dark:text-blue-400 shrink-0">
-                                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                             </div>
-                                            <span class="text-[13px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-snug">${item.name}</span>
+                                            <!-- Smaller font size on mobile to prevent overflow in 2-column layout -->
+                                            <span class="text-[11px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate sm:whitespace-normal">${item.name}</span>
                                         </div>
-                                        <div class="text-[9px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-1 rounded-md uppercase tracking-tighter shrink-0 transition-colors">x${item.qty}</div>
+                                        <div class="text-[8px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded uppercase tracking-tighter shrink-0 transition-colors">
+                                            x${item.qty}
+                                        </div>
                                     </label>
                                 </div>
                             `;
                         }).join('')}
                     </div>
-                </section>`;
+                </section>
+                `;
             }).join('');
+        }
+
+        function toggleItem(id, name) {
+            if (selectedItems.has(name)) {
+                selectedItems.delete(name);
+            } else {
+                selectedItems.add(name);
+            }
+            updateInquiryBar();
+            renderInventory(); 
         }
 
         function updateInquiryBar() {
             const bar = document.getElementById('inquiry-bar');
             const countEl = document.getElementById('selected-count');
             countEl.textContent = selectedItems.size;
-            if (selectedItems.size > 0) { bar.classList.add('visible'); } 
-            else { bar.classList.remove('visible'); }
+            if (selectedItems.size > 0) {
+                bar.classList.add('visible');
+            } else {
+                bar.classList.remove('visible');
+            }
         }
 
         function clearSelection() {
             selectedItems.clear();
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateInquiryBar();
             renderInventory(); 
         }
 
-        /**
-         * Helper to group selected items by category for inquiries
-         */
-        function getGroupedItems() {
-            const groups = {};
-            selectedItems.forEach(key => {
-                const [cat, item] = key.split('|');
-                if (!groups[cat]) groups[cat] = [];
-                groups[cat].push(item);
-            });
-            return groups;
+        function generateListString() {
+            return Array.from(selectedItems).join('%0A• ');
         }
 
         function sendWhatsApp() {
-            const grouped = getGroupedItems();
-            let listStr = "";
-            for (const cat in grouped) {
-                listStr += `%0A*${cat.toUpperCase()}*%0A`;
-                grouped[cat].forEach(item => { listStr += `- ${item}%0A`; });
-            }
-            const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following kit:${listStr}%0APlease share availability and a quote for these.`;
+            const list = generateListString();
+            const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following items:%0A%0A• ${list}%0A%0APlease share availability and a quote for these.`;
             window.open(`https://wa.me/919650563719?text=${message}`, '_blank');
         }
 
         function sendEmail() {
-            const grouped = getGroupedItems();
-            let listStr = "";
-            for (const cat in grouped) {
-                listStr += `%0D%0A--- ${cat.toUpperCase()} ---%0D%0A`;
-                grouped[cat].forEach(item => { listStr += `- ${item}%0D%0A`; });
-            }
+            const list = Array.from(selectedItems).join('%0D%0A• ');
             const subject = "Rental Inquiry: Polar Bear Films Inventory";
-            const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment:${listStr}%0D%0APlease let me know the rental rates for these items for my upcoming project.%0D%0A%0D%0ABest regards.`;
+            const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment availability:%0D%0A%0D%0A• ${list}%0D%0A%0D%0APlease let me know the rental rates for these items for my upcoming project.%0D%0A%0D%0ABest regards.`;
             window.location.href = `mailto:himanshusharma280@gmail.com?subject=${subject}&body=${body}`;
         }
 
@@ -461,5 +493,3 @@
     </script>
 </body>
 </html>
-
-```
