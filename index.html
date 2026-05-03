@@ -171,13 +171,26 @@
             </p>
         </div>
 
-        <!-- Category Dropdown -->
+        <!-- Filters Section -->
         <div class="sticky top-16 sm:top-20 z-30 bg-[#fcfcfd]/90 dark:bg-slate-950/90 backdrop-blur-md -mx-4 px-4 py-4 sm:-mx-6 sm:px-6 border-b border-slate-100 dark:border-slate-800 sm:border-none">
-            <div class="max-w-sm mx-auto sm:mx-0">
-                <label for="category-select" class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Filter by category</label>
-                <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
-                    <option value="all">All Inventory</option>
-                </select>
+            <div class="max-w-xl mx-auto sm:mx-0 flex flex-col gap-3">
+                <!-- Search Bar -->
+                <div class="relative group flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-brand dark:group-focus-within:text-blue-500 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </div>
+                    <input type="text" id="gear-search" oninput="handleSearch(this.value)" placeholder="Search gear (e.g. Ronin 2, Alexa Mini...)" 
+                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400">
+                </div>
+
+                <!-- Category Dropdown -->
+                <div class="flex items-center gap-3">
+                    <div class="flex-1">
+                        <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -231,6 +244,7 @@
         let inventoryData = [];
         let selectedItems = new Set();
         let activeCategory = 'all';
+        let searchQuery = '';
 
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -340,15 +354,20 @@
 
         function populateDropdown() {
             const select = document.getElementById('category-select');
-            const currentOptions = '<option value="all">All Inventory</option>';
+            const currentOptions = '<option value="all">All Categories</option>';
             const categoryOptions = inventoryData.map(cat => `<option value="${cat.id}">${cat.category}</option>`).join('');
             if(select) select.innerHTML = currentOptions + categoryOptions;
+        }
+
+        function handleSearch(val) {
+            searchQuery = val;
+            renderInventory();
         }
 
         function setActiveCategory(id) {
             activeCategory = id;
             renderInventory();
-            if (id !== 'all') {
+            if (id !== 'all' && !searchQuery) {
                 const target = document.getElementById(`section-${id}`);
                 if (target) {
                     const headerOffset = 180;
@@ -356,8 +375,6 @@
                     const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                     window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
                 }
-            } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
@@ -377,19 +394,41 @@
 
         function renderInventory() {
             const container = document.getElementById('inventory-container');
-            const filteredData = activeCategory === 'all' 
-                ? inventoryData 
-                : inventoryData.filter(cat => cat.id === activeCategory);
+            
+            // Normalize search query: lowercase and remove spaces
+            const normalizedQuery = searchQuery.toLowerCase().replace(/\s+/g, '');
+
+            const filteredData = inventoryData
+                .filter(cat => activeCategory === 'all' || cat.id === activeCategory)
+                .map(cat => {
+                    // Filter items within category based on search query (space-insensitive)
+                    const filteredItems = cat.items.filter(item => {
+                        if (!searchQuery) return true;
+                        const normalizedItemName = item.name.toLowerCase().replace(/\s+/g, '');
+                        return normalizedItemName.includes(normalizedQuery);
+                    });
+
+                    return { ...cat, items: filteredItems };
+                })
+                .filter(cat => cat.items.length > 0);
 
             if (filteredData.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-400 dark:text-slate-500 py-10">No items found.</p>';
+                container.innerHTML = `
+                    <div class="text-center py-20 animate-in fade-in duration-500">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 font-bold">No gear matches your search.</p>
+                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-2">Try a different keyword or check spelling.</p>
+                    </div>
+                `;
                 return;
             }
 
             container.innerHTML = filteredData.map((cat) => {
                 const allSelected = cat.items.every(i => selectedItems.has(i.name));
                 return `
-                <section id="section-${cat.id}" class="px-0 sm:px-1">
+                <section id="section-${cat.id}" class="px-0 sm:px-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div class="flex items-center justify-between mb-4 sm:mb-8 border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-4 transition-colors">
                         <div class="flex-1 min-w-0 pr-2 text-left">
                             <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight transition-colors truncate">
