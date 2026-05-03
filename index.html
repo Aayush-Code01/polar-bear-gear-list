@@ -11,7 +11,6 @@
     <!-- Meta Tags for Social Media / WhatsApp Sharing -->
     <meta property="og:title" content="Gear Inventory | Polar Bear Films">
     <meta property="og:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
-    <!-- Updated Social Share Image with Direct Access URL -->
     <meta property="og:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -136,7 +135,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
             <div class="flex items-center">
                 <div class="h-8 sm:h-12 w-auto flex items-center">
-                    <!-- Logo with filter for Dark Mode to make it white -->
                     <img src="https://lh3.googleusercontent.com/d/18GG_sRWwFyK_or7uQDR2FE4oItbIpEZ1" 
                          alt="Polar Bear Films" 
                          class="h-full object-contain transition-all dark:[filter:brightness(0)_invert(1)]"
@@ -163,18 +161,18 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div class="max-w-4xl mb-8 sm:mb-12 px-2">
+        <div class="max-w-4xl mb-8 sm:mb-12 px-2 text-center sm:text-left">
             <h2 class="text-3xl sm:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 sm:mb-6 leading-[1.1]">
                 Production <span class="text-brand dark:text-blue-500 italic">Ready.</span>
             </h2>
-            <p class="text-base sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+            <p class="text-sm sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
                 Professional cinematography gear rental. Select your items to receive an instant quotation.
             </p>
         </div>
 
         <!-- Category Dropdown -->
         <div class="sticky top-16 sm:top-20 z-30 bg-[#fcfcfd]/90 dark:bg-slate-950/90 backdrop-blur-md -mx-4 px-4 py-4 sm:-mx-6 sm:px-6 border-b border-slate-100 dark:border-slate-800 sm:border-none">
-            <div class="max-w-sm">
+            <div class="max-w-sm mx-auto sm:mx-0">
                 <label for="category-select" class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Filter by category</label>
                 <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-sm font-bold rounded-xl px-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
                     <option value="all">All Inventory</option>
@@ -229,7 +227,6 @@
         let selectedItems = new Set();
         let activeCategory = 'all';
 
-        // Dark Mode Logic
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -305,15 +302,15 @@
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || row.length <= Math.max(catIdx, descIdx)) continue;
-                    
                     const category = row[catIdx];
                     const description = row[descIdx];
                     const qty = (qtyIdx !== -1 && row[qtyIdx]) ? row[qtyIdx] : '1';
-                    
                     if (category && description && isNaN(category)) {
                         rawItems.push({ category, name: description, qty });
                     }
                 }
+
+                if (rawItems.length === 0) throw new Error('No valid gear items found.');
 
                 const groups = {};
                 rawItems.forEach(item => {
@@ -339,9 +336,7 @@
         function populateDropdown() {
             const select = document.getElementById('category-select');
             const currentOptions = '<option value="all">All Inventory</option>';
-            const categoryOptions = inventoryData.map(cat => `
-                <option value="${cat.id}">${cat.category}</option>
-            `).join('');
+            const categoryOptions = inventoryData.map(cat => `<option value="${cat.id}">${cat.category}</option>`).join('');
             select.innerHTML = currentOptions + categoryOptions;
         }
 
@@ -364,16 +359,13 @@
         function toggleCategory(catId) {
             const category = inventoryData.find(c => c.id === catId);
             if (!category) return;
-
             const allNames = category.items.map(i => i.name);
             const allSelected = allNames.every(name => selectedItems.has(name));
-
             if (allSelected) {
                 allNames.forEach(name => selectedItems.delete(name));
             } else {
                 allNames.forEach(name => selectedItems.add(name));
             }
-
             renderInventory();
             updateInquiryBar();
         }
@@ -392,24 +384,23 @@
             container.innerHTML = filteredData.map((cat) => {
                 const allSelected = cat.items.every(i => selectedItems.has(i.name));
                 return `
-                <section id="section-${cat.id}" class="px-1">
-                    <div class="flex items-center justify-between mb-4 sm:mb-8 border-b-2 border-slate-50 dark:border-slate-800 pb-3 sm:pb-4 transition-colors">
+                <section id="section-${cat.id}" class="px-0 sm:px-1">
+                    <div class="flex items-center justify-between mb-4 sm:mb-8 border-b border-slate-100 dark:border-slate-800 pb-3 sm:pb-4 transition-colors">
                         <div class="flex-1">
-                            <h3 class="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight transition-colors">
+                            <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight transition-colors">
                                 ${cat.category}
                             </h3>
-                            <div class="flex items-center space-x-3 mt-1">
-                                <span class="text-[9px] sm:text-[10px] font-black text-brand dark:text-blue-400 tracking-[0.1em] uppercase bg-brand/5 dark:bg-brand/20 px-2 py-1 rounded-md whitespace-nowrap">${cat.items.length} Units</span>
+                            <div class="flex items-center space-x-3 mt-0.5">
+                                <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 tracking-[0.1em] uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded whitespace-nowrap">${cat.items.length} Units</span>
                             </div>
                         </div>
                         <button onclick="toggleCategory('${cat.id}')" 
-                                class="flex items-center space-x-2 px-3 py-2 rounded-xl border-2 transition-all active:scale-95
-                                ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40 dark:hover:border-blue-500/40'}">
-                            <span class="text-[10px] font-black uppercase tracking-wider">${allSelected ? 'Clear Kit' : 'Select Kit'}</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                class="flex items-center space-x-1.5 px-2 py-1.5 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border transition-all active:scale-95 text-[9px] sm:text-[10px] font-black uppercase tracking-wider
+                                ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40 dark:hover:border-blue-500/40'}">
+                            <span>${allSelected ? 'Clear' : 'Select All'}</span>
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         </button>
                     </div>
-                    <!-- 2 columns on mobile, item cards grow vertically to wrap text -->
                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                         ${cat.items.map((item, itemIdx) => {
                             const uniqueId = `item-${cat.id}-${itemIdx}`;
@@ -419,15 +410,14 @@
                                     <input type="checkbox" id="${uniqueId}" class="hidden" 
                                            ${isChecked ? 'checked' : ''}
                                            onchange="toggleItem('${uniqueId}', '${item.name.replace(/'/g, "\\'")}')">
-                                    <label for="${uniqueId}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors h-full">
-                                        <div class="flex items-center space-x-2 sm:space-x-4 pr-1 min-w-0">
+                                    <label for="${uniqueId}" class="item-card flex items-center justify-between p-2 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors h-full">
+                                        <div class="flex items-center space-x-1.5 sm:space-x-4 min-w-0 flex-1">
                                             <div class="check-icon ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all text-brand dark:text-blue-400 shrink-0">
-                                                <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                                <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                             </div>
-                                            <!-- Text now wraps and is middle-aligned -->
-                                            <span class="text-[11px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight break-words">${item.name}</span>
+                                            <span class="text-[10px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight break-words">${item.name}</span>
                                         </div>
-                                        <div class="text-[8px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded uppercase tracking-tighter shrink-0 transition-colors ml-1">
+                                        <div class="text-[7px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1 py-0.5 sm:px-2 sm:py-1 rounded uppercase tracking-tighter shrink-0 transition-colors ml-1">
                                             x${item.qty}
                                         </div>
                                     </label>
@@ -491,3 +481,4 @@
         };
     </script>
 </body>
+</html>
