@@ -130,6 +130,12 @@
         /* Modal animations */
         #preview-modal.hidden { display: none; }
         #preview-modal.visible { display: flex; }
+
+        /* Search dropdown styles */
+        #search-results-dropdown {
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="pb-32 sm:pb-40">
@@ -183,7 +189,13 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </div>
                     <input type="text" id="gear-search" oninput="handleSearch(this.value)" placeholder="Search gear (e.g. Ronin 2, Alexa Mini...)" 
+                           autocomplete="off"
                            class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-base sm:text-sm font-semibold rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400">
+                    
+                    <!-- Search Results Dropdown -->
+                    <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden custom-scrollbar">
+                        <!-- Dropdown items will be injected here -->
+                    </div>
                 </div>
 
                 <!-- Category Dropdown -->
@@ -269,7 +281,7 @@
         const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
 
         let inventoryData = [];
-        let selectedItems = new Map(); // Using Map to store item name and quantity
+        let selectedItems = new Map();
         let activeCategory = 'all';
         let searchQuery = '';
 
@@ -296,7 +308,6 @@
             let row = [];
             let cur = '';
             let inQuote = false;
-            
             for (let i = 0; i < text.length; i++) {
                 let char = text[i];
                 let next = text[i + 1];
@@ -362,7 +373,81 @@
             if(select) select.innerHTML = '<option value="all">All Categories</option>' + categoryOptions;
         }
 
-        function handleSearch(val) { searchQuery = val; renderInventory(); }
+        /**
+         * Handle Search Input with Suggestions Dropdown
+         */
+        function handleSearch(val) {
+            searchQuery = val;
+            const dropdown = document.getElementById('search-results-dropdown');
+            
+            if (!val.trim()) {
+                dropdown.classList.add('hidden');
+                renderInventory();
+                return;
+            }
+
+            const normalizedQuery = val.toLowerCase().replace(/\s+/g, '');
+            const matches = [];
+            
+            inventoryData.forEach(cat => {
+                cat.items.forEach(item => {
+                    const normalizedItemName = item.name.toLowerCase().replace(/\s+/g, '');
+                    if (normalizedItemName.includes(normalizedQuery)) {
+                        matches.push({ ...item, category: cat.category, catId: cat.id });
+                    }
+                });
+            });
+
+            if (matches.length > 0) {
+                dropdown.classList.remove('hidden');
+                
+                // Dropdown Header: "Show All" option
+                let html = `
+                    <button onclick="showAllSearchResults()" class="w-full text-left px-4 py-3 bg-brand/5 dark:bg-blue-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between hover:bg-brand/10 dark:hover:bg-blue-500/20 transition-colors">
+                        <span class="text-xs font-black uppercase text-brand dark:text-blue-400">Show all containing "${val}"</span>
+                        <svg class="w-4 h-4 text-brand dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                    </button>
+                `;
+
+                // Item suggestions
+                html += matches.slice(0, 10).map(match => `
+                    <button onclick="selectFromDropdown('${match.name.replace(/'/g, "\\'")}', '${match.qty}')" 
+                            class="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/50 last:border-0">
+                        <div class="min-w-0 pr-2">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${match.name}</p>
+                            <p class="text-[10px] text-slate-400 font-medium uppercase">${match.category}</p>
+                        </div>
+                        <span class="text-[10px] font-black text-brand dark:text-blue-400">SELECT</span>
+                    </button>
+                `).join('');
+
+                dropdown.innerHTML = html;
+            } else {
+                dropdown.innerHTML = '<div class="px-4 py-6 text-center text-slate-400 text-sm">No matches found.</div>';
+                dropdown.classList.remove('hidden');
+            }
+        }
+
+        function showAllSearchResults() {
+            document.getElementById('search-results-dropdown').classList.add('hidden');
+            renderInventory();
+        }
+
+        function selectFromDropdown(name, qty) {
+            toggleItem('', name, qty);
+            document.getElementById('gear-search').value = '';
+            searchQuery = '';
+            document.getElementById('search-results-dropdown').classList.add('hidden');
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('search-results-dropdown');
+            const searchInput = document.getElementById('gear-search');
+            if (dropdown && !dropdown.contains(e.target) && e.target !== searchInput) {
+                dropdown.classList.add('hidden');
+            }
+        });
 
         function setActiveCategory(id) {
             activeCategory = id;
@@ -421,7 +506,7 @@
                 <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div class="min-w-0 pr-4">
                         <p class="text-sm font-bold text-slate-800 dark:text-white leading-tight">${name}</p>
-                        <span class="text-[10px] font-black text-slate-400">Qty: ${qty}</span>
+                        <span class="text-[10px] font-black text-slate-400 uppercase">Quantity: ${qty}</span>
                     </div>
                     <button onclick="removeFromPreview('${name.replace(/'/g, "\\'")}')" class="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -465,7 +550,7 @@
                 .filter(cat => cat.items.length > 0);
 
             if (filteredData.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-400">No gear matches your search.</div>`;
+                container.innerHTML = `<div class="text-center py-20 text-slate-400 italic">No gear matches your search.</div>`;
                 return;
             }
 
@@ -473,12 +558,12 @@
                 const allSelected = cat.items.every(i => selectedItems.has(i.name));
                 return `
                 <section id="section-${cat.id}" class="px-0 sm:px-1">
-                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3 transition-colors">
                         <div class="flex-1 min-w-0 pr-2">
-                            <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate">${cat.category}</h3>
-                            <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded">${cat.items.length} Items</span>
+                            <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate transition-colors">${cat.category}</h3>
+                            <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded transition-colors">${cat.items.length} Items</span>
                         </div>
-                        <button onclick="toggleCategory('${cat.id}')" class="px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all ${allSelected ? 'bg-brand border-brand text-white' : 'bg-white dark:bg-slate-900 border-slate-200 text-slate-500'}">
+                        <button onclick="toggleCategory('${cat.id}')" class="px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all active:scale-95 ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40'}">
                             ${allSelected ? 'Clear' : 'Select All'}
                         </button>
                     </div>
@@ -488,14 +573,15 @@
                             return `
                                 <div class="relative group">
                                     <input type="checkbox" id="item-${cat.id}-${itemIdx}" class="hidden" ${isChecked ? 'checked' : ''} onchange="toggleItem('item-${cat.id}-${itemIdx}', '${item.name.replace(/'/g, "\\'")}', '${item.qty}')">
-                                    <label for="item-${cat.id}-${itemIdx}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 h-full transition-colors">
+                                    <label for="item-${cat.id}-${itemIdx}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 h-full transition-all transition-colors">
                                         <div class="flex items-center space-x-1.5 sm:space-x-4 flex-1 min-w-0">
-                                            <div class="check-icon transition-all ${isChecked ? 'opacity-100 text-brand dark:text-blue-400' : 'opacity-20 text-slate-400 dark:text-slate-600'}">
-                                                <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            <div class="check-icon transition-all shrink-0 
+                                                ${isChecked ? 'opacity-100 scale-100 text-brand dark:text-blue-400' : 'opacity-20 scale-100 text-slate-400 dark:text-slate-600'}">
+                                                <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                             </div>
-                                            <span class="text-[12.5px] sm:text-[15px] font-bold dark:text-slate-200 leading-tight break-words text-left">${item.name}</span>
+                                            <span class="text-[12.5px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight break-words text-left transition-colors">${item.name}</span>
                                         </div>
-                                        <div class="text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded ml-1">x${item.qty}</div>
+                                        <div class="text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded ml-1 transition-colors">x${item.qty}</div>
                                     </label>
                                 </div>
                             `;
@@ -506,13 +592,19 @@
             }).join('');
         }
 
+        function generateListString() {
+            return Array.from(selectedItems).map(([name]) => name).join('%0A• ');
+        }
+
         function sendWhatsApp() {
-            const list = Array.from(selectedItems).map(([name]) => name).join('%0A• ');
+            if (selectedItems.size === 0) return;
+            const list = generateListString();
             const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following items:%0A%0A• ${list}%0A%0APlease share availability and a quote for these.`;
             window.open(`https://wa.me/919650563719?text=${message}`, '_blank');
         }
 
         function sendEmail() {
+            if (selectedItems.size === 0) return;
             const list = Array.from(selectedItems).map(([name]) => name).join('%0D%0A• ');
             const subject = "Rental Inquiry: Polar Bear Films Inventory";
             const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment availability:%0D%0A%0D%0A• ${list}%0D%0A%0D%0APlease let me know the rental rates for these items for my upcoming project.%0D%0A%0D%0ABest regards.`;
