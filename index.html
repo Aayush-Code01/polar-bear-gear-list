@@ -409,7 +409,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                         </button>
                     </div>
-                    <!-- Updated Grid for 2 columns on mobile -->
+                    <!-- 2 columns on mobile, item cards grow vertically to wrap text -->
                     <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                         ${cat.items.map((item, itemIdx) => {
                             const uniqueId = `item-${cat.id}-${itemIdx}`;
@@ -419,16 +419,15 @@
                                     <input type="checkbox" id="${uniqueId}" class="hidden" 
                                            ${isChecked ? 'checked' : ''}
                                            onchange="toggleItem('${uniqueId}', '${item.name.replace(/'/g, "\\'")}')">
-                                    <!-- Reduced padding on mobile to accommodate 2 columns -->
-                                    <label for="${uniqueId}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors">
-                                        <div class="flex items-center space-x-2 sm:space-x-4 pr-1 min-w-0">
-                                            <div class="check-icon ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all text-brand dark:text-blue-400 shrink-0">
+                                    <label for="${uniqueId}" class="item-card flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors h-full">
+                                        <div class="flex items-start space-x-2 sm:space-x-4 pr-1 min-w-0 mb-2 sm:mb-0">
+                                            <div class="check-icon ${isChecked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'} transition-all text-brand dark:text-blue-400 shrink-0 mt-0.5">
                                                 <svg class="w-4 h-4 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                                             </div>
-                                            <!-- Smaller font size on mobile to prevent overflow in 2-column layout -->
-                                            <span class="text-[11px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight truncate sm:whitespace-normal">${item.name}</span>
+                                            <!-- Text now wraps instead of truncating -->
+                                            <span class="text-[11px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight break-words">${item.name}</span>
                                         </div>
-                                        <div class="text-[8px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded uppercase tracking-tighter shrink-0 transition-colors">
+                                        <div class="text-[8px] sm:text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded uppercase tracking-tighter shrink-0 transition-colors mt-auto self-end sm:self-center">
                                             x${item.qty}
                                         </div>
                                     </label>
