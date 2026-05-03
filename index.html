@@ -191,6 +191,13 @@
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-slate-100 dark:border-slate-800 transition-colors text-center">
+        <p class="text-[10px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
+            © 2026 POLAR BEAR FILMS PRIVATE LIMITED
+        </p>
+    </footer>
+
     <!-- Inquiry Bar -->
     <div id="inquiry-bar" class="sticky-footer px-4 py-4 sm:py-6">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
@@ -335,7 +342,7 @@
             const select = document.getElementById('category-select');
             const currentOptions = '<option value="all">All Inventory</option>';
             const categoryOptions = inventoryData.map(cat => `<option value="${cat.id}">${cat.category}</option>`).join('');
-            select.innerHTML = currentOptions + categoryOptions;
+            if(select) select.innerHTML = currentOptions + categoryOptions;
         }
 
         function setActiveCategory(id) {
@@ -410,7 +417,6 @@
                                            onchange="toggleItem('${uniqueId}', '${item.name.replace(/'/g, "\\'")}')">
                                     <label for="${uniqueId}" class="item-card flex flex-row items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 dark:hover:border-blue-500/30 transition-all select-none transition-colors h-full">
                                         <div class="flex items-center space-x-1.5 sm:space-x-4 min-w-0 flex-1">
-                                            <!-- Greyed out check mark for guidance -->
                                             <div class="check-icon transition-all shrink-0 
                                                 ${isChecked ? 'opacity-100 scale-100 text-brand dark:text-blue-400' : 'opacity-20 scale-100 text-slate-400 dark:text-slate-600'}">
                                                 <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
@@ -443,11 +449,13 @@
         function updateInquiryBar() {
             const bar = document.getElementById('inquiry-bar');
             const countEl = document.getElementById('selected-count');
-            countEl.textContent = selectedItems.size;
-            if (selectedItems.size > 0) {
-                bar.classList.add('visible');
-            } else {
-                bar.classList.remove('visible');
+            if(countEl) countEl.textContent = selectedItems.size;
+            if(bar) {
+                if (selectedItems.size > 0) {
+                    bar.classList.add('visible');
+                } else {
+                    bar.classList.remove('visible');
+                }
             }
         }
 
