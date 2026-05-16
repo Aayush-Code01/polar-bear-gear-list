@@ -209,13 +209,11 @@
             </div>
         </div>
 
-        <div id="inventory-container" class="space-y-10 sm:space-y-16 mt-6 sm:mt-10">
-            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div class="h-16 rounded-2xl shimmer opacity-30"></div>
-                <div class="h-16 rounded-2xl shimmer opacity-30"></div>
-                <div class="h-16 rounded-2xl shimmer opacity-30"></div>
-                <div class="h-16 rounded-2xl shimmer opacity-30"></div>
-            </div>
+        <div id="inventory-container" class="space-y-1 sm:space-y-4 mt-6 sm:mt-10">
+            <!-- Loading states -->
+            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
+            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
+            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
         </div>
     </main>
 
@@ -282,6 +280,7 @@
 
         let inventoryData = [];
         let selectedItems = new Map();
+        let expandedCategories = new Set(); // Track which categories are expanded
         let activeCategory = 'all';
         let searchQuery = '';
 
@@ -401,7 +400,6 @@
             if (matches.length > 0) {
                 dropdown.classList.remove('hidden');
                 
-                // Dropdown Header: "Show All" option
                 let html = `
                     <button onclick="showAllSearchResults()" class="w-full text-left px-4 py-3 bg-brand/5 dark:bg-blue-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between hover:bg-brand/10 dark:hover:bg-blue-500/20 transition-colors">
                         <span class="text-xs font-black uppercase text-brand dark:text-blue-400">Show all containing "${val}"</span>
@@ -409,9 +407,8 @@
                     </button>
                 `;
 
-                // Item suggestions
                 html += matches.slice(0, 10).map(match => `
-                    <button onclick="selectFromDropdown('${match.name.replace(/'/g, "\\'")}', '${match.qty}')" 
+                    <button onclick="selectFromDropdown('${match.name.replace(/'/g, "\\'")}', '${match.qty}', '${match.catId}')" 
                             class="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/50 last:border-0">
                         <div class="min-w-0 pr-2">
                             <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${match.name}</p>
@@ -430,17 +427,19 @@
 
         function showAllSearchResults() {
             document.getElementById('search-results-dropdown').classList.add('hidden');
+            // Auto-expand all categories when showing search results
+            inventoryData.forEach(cat => expandedCategories.add(cat.id));
             renderInventory();
         }
 
-        function selectFromDropdown(name, qty) {
+        function selectFromDropdown(name, qty, catId) {
+            expandedCategories.add(catId); // Ensure category is open to see selection
             toggleItem('', name, qty);
             document.getElementById('gear-search').value = '';
             searchQuery = '';
             document.getElementById('search-results-dropdown').classList.add('hidden');
         }
 
-        // Close dropdown on outside click
         document.addEventListener('click', (e) => {
             const dropdown = document.getElementById('search-results-dropdown');
             const searchInput = document.getElementById('gear-search');
@@ -451,6 +450,9 @@
 
         function setActiveCategory(id) {
             activeCategory = id;
+            if (id !== 'all') {
+                expandedCategories.add(id); // Automatically expand if chosen from dropdown
+            }
             renderInventory();
             if (id !== 'all' && !searchQuery) {
                 const target = document.getElementById(`section-${id}`);
@@ -458,7 +460,17 @@
             }
         }
 
-        function toggleCategory(catId) {
+        function toggleCategoryExpansion(catId) {
+            if (expandedCategories.has(catId)) {
+                expandedCategories.delete(catId);
+            } else {
+                expandedCategories.add(catId);
+            }
+            renderInventory();
+        }
+
+        function toggleCategory(event, catId) {
+            event.stopPropagation(); // Prevent toggling expansion when clicking "Select All"
             const category = inventoryData.find(c => c.id === catId);
             if (!category) return;
             const allNames = category.items.map(i => i.name);
@@ -555,23 +567,32 @@
             }
 
             container.innerHTML = filteredData.map((cat) => {
+                const isExpanded = expandedCategories.has(cat.id);
                 const allSelected = cat.items.every(i => selectedItems.has(i.name));
+                
                 return `
                 <section id="section-${cat.id}" class="px-0 sm:px-1">
-                    <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-3 transition-colors">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate transition-colors">${cat.category}</h3>
-                            <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded transition-colors">${cat.items.length} Items</span>
+                    <div onclick="toggleCategoryExpansion('${cat.id}')" class="flex items-center justify-between mb-2 sm:mb-4 border-b border-slate-100 dark:border-slate-800 py-3 cursor-pointer group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/50 rounded-xl sm:px-2">
+                        <div class="flex items-center space-x-3 min-w-0 pr-2">
+                            <!-- Toggle Chevron -->
+                            <svg class="w-5 h-5 text-slate-400 dark:text-slate-600 group-hover:text-brand transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                            <div class="min-w-0">
+                                <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate transition-colors">${cat.category}</h3>
+                                <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded transition-colors">${cat.items.length} Items</span>
+                            </div>
                         </div>
-                        <button onclick="toggleCategory('${cat.id}')" class="px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all active:scale-95 ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40'}">
+                        <button onclick="toggleCategory(event, '${cat.id}')" class="px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all active:scale-95 whitespace-nowrap ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40'}">
                             ${allSelected ? 'Clear' : 'Select All'}
                         </button>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+                    
+                    <div class="${isExpanded ? 'grid' : 'hidden'} grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 pb-6 animate-in slide-in-from-top-2 duration-200">
                         ${cat.items.map((item, itemIdx) => {
                             const isChecked = selectedItems.has(item.name);
                             return `
-                                <div class="relative group">
+                                <div class="relative">
                                     <input type="checkbox" id="item-${cat.id}-${itemIdx}" class="hidden" ${isChecked ? 'checked' : ''} onchange="toggleItem('item-${cat.id}-${itemIdx}', '${item.name.replace(/'/g, "\\'")}', '${item.qty}')">
                                     <label for="item-${cat.id}-${itemIdx}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 h-full transition-all transition-colors">
                                         <div class="flex items-center space-x-1.5 sm:space-x-4 flex-1 min-w-0">
