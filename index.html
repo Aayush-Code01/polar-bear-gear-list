@@ -1,17 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Gear Inventory | Polar Bear Films</title>
     
-    <!-- Favicon & Meta -->
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1G4op79FMnkfDaYsHYqCwToCgzi2HOdVp">
+    
+    <!-- Meta Tags for Social Media / WhatsApp Sharing -->
     <meta property="og:title" content="Gear Inventory | Polar Bear Films">
     <meta property="og:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
+    <meta property="og:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:type" content="website">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Gear Inventory | Polar Bear Films">
+    <meta name="twitter:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
+    <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,47 +32,71 @@
                         brand: '#110086',
                     },
                     fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    animation: {
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'shimmer': 'shimmer 1.5s infinite',
+                    },
+                    keyframes: {
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        shimmer: {
+                            '100%': { transform: 'translateX(100%)' }
+                        }
                     }
                 }
             }
         }
     </script>
-
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
         body { 
-            -webkit-tap-highlight-color: transparent; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        /* Shimmer Loading Animation */
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
-        .animate-shimmer { animation: shimmer 1.5s infinite; }
-        
+
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
 
-        /* Smooth Expand/Collapse transition for Grid */
+        /* Floating Checkout Bar Transitions */
+        #checkout-bar {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #checkout-bar.hidden-bar {
+            transform: translateY(150%);
+        }
+        #checkout-bar.visible-bar {
+            transform: translateY(0);
+        }
+
+        /* Category Expand/Collapse Transitions */
         .category-content {
-            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             max-height: 0;
             opacity: 0;
             overflow: hidden;
         }
         .category-content.expanded {
-            max-height: 5000px; /* arbitrary large height to allow content to flow */
+            max-height: 5000px; /* Arbitrary large number to allow full expansion */
             opacity: 1;
         }
-        
-        /* Modal Animation */
-        @keyframes scale-in { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .animate-scale-in { animation: scale-in 0.2s ease-out forwards; }
+
+        /* Select styling override */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 selection:bg-brand/20 selection:text-brand dark:selection:bg-blue-500/30 transition-colors duration-300 pb-32 sm:pb-40">
+<body class="bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300 pb-32 sm:pb-40 selection:bg-brand/20 selection:text-brand dark:selection:bg-blue-500/30">
 
     <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
@@ -73,30 +107,26 @@
                     class="h-full object-contain transition-all dark:filter dark:brightness-0 dark:invert"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 />
-                <div class="hidden bg-brand dark:bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black text-sm sm:text-base tracking-wider items-center justify-center">
+                <div class="hidden bg-[#110086] dark:bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black text-sm sm:text-base tracking-wider items-center justify-center">
                     PBF
                 </div>
             </div>
             
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <button data-action="toggle-theme" class="p-2 sm:p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
-                    <!-- Sun Icon (Hidden in Dark) -->
-                    <svg class="w-5 h-5 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-                    </svg>
-                    <!-- Moon Icon (Hidden in Light) -->
-                    <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                    </svg>
+                <button 
+                    onclick="toggleTheme()" 
+                    class="p-2 sm:p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+                    aria-label="Toggle Theme"
+                >
+                    <svg id="theme-icon-sun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" /></svg>
+                    <svg id="theme-icon-moon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                 </button>
                 
-                <a href="tel:+919650563719" class="group flex items-center space-x-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-brand/5 dark:bg-blue-500/10 rounded-xl hover:bg-brand/10 dark:hover:bg-blue-500/20 transition-all duration-300 active:scale-95">
-                    <div class="text-brand dark:text-blue-400 group-hover:scale-110 transition-transform">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
+                <a href="tel:+919650563719" class="group flex items-center space-x-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-[#110086]/5 dark:bg-blue-500/10 rounded-xl hover:bg-[#110086]/10 dark:hover:bg-blue-500/20 transition-all duration-300 active:scale-95">
+                    <div class="text-[#110086] dark:text-blue-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
                     </div>
-                    <span class="text-xs sm:text-sm font-bold text-brand dark:text-blue-400 tracking-tight">+91 96505 63719</span>
+                    <span class="text-xs sm:text-sm font-bold text-[#110086] dark:text-blue-400 tracking-tight">+91 96505 63719</span>
                 </a>
             </div>
         </div>
@@ -105,75 +135,97 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16">
         <!-- Hero Section -->
         <div class="max-w-3xl mb-10 sm:mb-16 text-left relative">
-            <div class="absolute -top-20 -left-20 w-64 h-64 bg-brand/10 dark:bg-blue-600/20 rounded-full blur-[80px] pointer-events-none"></div>
+            <div class="absolute -top-20 -left-20 w-64 h-64 bg-[#110086]/10 dark:bg-blue-600/20 rounded-full blur-[80px] pointer-events-none"></div>
             <h1 class="text-5xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 sm:mb-6 leading-[1.05] relative z-10">
                 Production <br class="sm:hidden" />
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand to-blue-500 dark:from-blue-400 dark:to-blue-600">Ready.</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#110086] to-blue-500 dark:from-blue-400 dark:to-blue-600">Ready.</span>
             </h1>
             <p class="text-base sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-semibold max-w-2xl">
                 Professional cinematography gear rental. Curate your loadout to receive an instant quotation.
             </p>
         </div>
 
-        <!-- Controls (Search + Filter) -->
+        <!-- Controls -->
         <div class="sticky top-[64px] sm:top-[80px] z-30 bg-slate-50/90 dark:bg-[#020617]/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 py-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none sm:border-none sm:py-0">
-            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-4xl relative">
-                
+            <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-4xl">
                 <!-- Search -->
-                <div class="relative flex-1 group" id="search-container">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-brand dark:group-focus-within:text-blue-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <div class="relative flex-1" id="search-wrapper">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#110086] dark:group-focus-within:text-blue-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <input 
+                            type="text" 
+                            id="search-input"
+                            placeholder="Search gear (e.g. Ronin 2, Alexa...)" 
+                            autocomplete="off"
+                            class="w-full bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-semibold rounded-2xl pl-12 pr-4 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-[#110086] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#110086]/10 dark:focus:ring-blue-500/10 transition-all placeholder:text-slate-400/80 placeholder:font-medium"
+                        />
                     </div>
-                    <input type="text" id="search-input" placeholder="Search gear (e.g. Ronin 2, Alexa...)" autocomplete="off"
-                        class="w-full bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-semibold rounded-2xl pl-12 pr-4 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-brand dark:focus:border-blue-500 focus:ring-4 focus:ring-brand/10 dark:focus:ring-blue-500/10 transition-all placeholder:text-slate-400/80 placeholder:font-medium"
-                    >
-                    
                     <!-- Search Dropdown -->
-                    <div id="search-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-[60vh] overflow-y-auto overflow-hidden flex flex-col custom-scrollbar">
-                        <!-- Search results injected here -->
+                    <div id="search-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-[60vh] overflow-y-auto overflow-hidden flex flex-col">
+                        <!-- Search results injected here via JS -->
                     </div>
                 </div>
 
                 <!-- Category Select -->
                 <div class="relative shrink-0 sm:w-64 group">
-                    <select id="category-select" class="w-full appearance-none bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-bold rounded-2xl pl-4 pr-10 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-brand dark:focus:border-blue-500 focus:ring-4 focus:ring-brand/10 dark:focus:ring-blue-500/10 transition-all cursor-pointer">
+                    <select 
+                        id="category-select"
+                        class="w-full appearance-none bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-bold rounded-2xl pl-4 pr-10 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-[#110086] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#110086]/10 dark:focus:ring-blue-500/10 transition-all cursor-pointer"
+                    >
                         <option value="all">All Categories</option>
                     </select>
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-hover:text-brand dark:group-hover:text-blue-400 transition-colors">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-hover:text-[#110086] dark:group-hover:text-blue-400 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Inventory List Container -->
+        <!-- Inventory List -->
         <div id="inventory-container" class="mt-8 sm:mt-12 min-h-[50vh]">
-            <!-- Loading Shimmers -->
-            <div class="space-y-4 sm:space-y-6 mt-8">
+            <!-- Shimmer Loading Default -->
+            <div class="space-y-4 sm:space-y-6 mt-8 animate-pulse" id="loading-state">
                 <div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl h-16 sm:h-20 w-full overflow-hidden relative">
                     <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent animate-shimmer"></div>
                 </div>
                 <div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl h-16 sm:h-20 w-full overflow-hidden relative">
-                    <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent animate-shimmer" style="animation-delay: 0.2s"></div>
+                    <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent animate-shimmer"></div>
+                </div>
+                <div class="bg-slate-100 dark:bg-slate-800/50 rounded-2xl h-16 sm:h-20 w-full overflow-hidden relative">
+                    <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent animate-shimmer"></div>
                 </div>
             </div>
+            
+            <!-- Error State -->
+            <div id="error-state" class="hidden p-8 text-center bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-3xl font-bold border border-red-100 dark:border-red-900/30">
+                Could not load inventory. Please try again later.
+            </div>
+
+            <!-- Empty Search State -->
+            <div id="empty-state" class="hidden py-20 text-center text-slate-400 font-medium">
+                No gear matches your search.
+            </div>
+
+            <!-- Dynamic Content -->
+            <div id="categories-wrapper"></div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-12 mt-10 border-t border-slate-200 dark:border-slate-800/50 text-center">
-        <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-            © <span id="current-year"></span> POLAR BEAR FILMS PRIVATE LIMITED
-        </p>
+        <p class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.2em]" id="copyright-text"></p>
+        <script>document.getElementById('copyright-text').textContent = `© ${new Date().getFullYear()} POLAR BEAR FILMS PRIVATE LIMITED`;</script>
     </footer>
 
-    <!-- Floating Checkout Bar -->
-    <div id="checkout-bar" class="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 pointer-events-none transition-transform duration-500 ease-out translate-y-full">
+    <!-- Checkout Bar -->
+    <div id="checkout-bar" class="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 pointer-events-none hidden-bar">
         <div class="max-w-4xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl shadow-[0_20px_40px_-10px_rgba(17,0,134,0.15)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto">
-            
+            <!-- Info Section -->
             <div class="flex items-center space-x-4 w-full sm:w-auto">
                 <div class="relative shrink-0">
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-brand to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#110086] to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
                         <span id="selected-count" class="text-xl sm:text-2xl font-black text-white">0</span>
                     </div>
                     <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></div>
@@ -181,24 +233,24 @@
                 <div class="flex-1">
                     <h4 class="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">Ready for Quote</h4>
                     <div class="flex items-center space-x-3 mt-0.5">
-                        <button data-action="open-preview" class="text-[11px] sm:text-xs font-black text-brand dark:text-blue-400 hover:text-blue-700 transition-colors uppercase tracking-wider underline decoration-brand/30 underline-offset-4">
+                        <button id="view-list-btn" class="text-[11px] sm:text-xs font-black text-[#110086] dark:text-blue-400 hover:text-blue-700 transition-colors uppercase tracking-wider underline decoration-[#110086]/30 underline-offset-4">
                             View List
                         </button>
                         <span class="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></span>
-                        <button data-action="clear-selection" class="text-[11px] sm:text-xs font-black text-slate-500 hover:text-red-500 transition-colors uppercase tracking-wider">
+                        <button id="clear-list-btn" class="text-[11px] sm:text-xs font-black text-slate-500 hover:text-red-500 transition-colors uppercase tracking-wider">
                             Clear
                         </button>
                     </div>
                 </div>
             </div>
-
+            <!-- Actions Section -->
             <div class="flex w-full sm:w-auto gap-2 sm:gap-3">
-                <button data-action="send-whatsapp" class="flex-1 sm:flex-none flex items-center justify-center space-x-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md shadow-[#25D366]/20">
-                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                <button id="whatsapp-btn" class="flex-1 sm:flex-none flex items-center justify-center space-x-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md shadow-[#25D366]/20">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
                     <span class="hidden sm:inline">WhatsApp</span>
                 </button>
-                <button data-action="send-email" class="flex-[2] sm:flex-none flex items-center justify-center space-x-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-6 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                <button id="email-btn" class="flex-[2] sm:flex-none flex items-center justify-center space-x-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-6 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                     <span>Email Quote</span>
                 </button>
             </div>
@@ -206,25 +258,25 @@
     </div>
 
     <!-- Preview Modal -->
-    <div id="preview-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-        <div class="absolute inset-0" data-action="close-preview"></div>
+    <div id="preview-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+        <div class="absolute inset-0" id="modal-overlay"></div>
         <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-scale-in">
             <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
                 <div>
                     <h3 class="font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight">Your Loadout</h3>
-                    <p id="modal-subtitle" class="text-xs font-bold text-brand dark:text-blue-400 mt-1 uppercase tracking-wider">0 Items Selected</p>
+                    <p class="text-xs font-bold text-[#110086] dark:text-blue-400 mt-1 uppercase tracking-wider"><span id="modal-count">0</span> Items Selected</p>
                 </div>
-                <button data-action="close-preview" class="p-2 -mr-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+                <button id="close-modal-btn" class="p-2 -mr-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             
-            <div id="modal-list" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2 sm:space-y-3 custom-scrollbar">
-                <!-- Modal items injected here -->
+            <div id="modal-item-list" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2 sm:space-y-3 custom-scrollbar">
+                <!-- Items injected here -->
             </div>
             
             <div id="modal-footer" class="p-4 sm:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.05)] z-10 hidden">
-                <button data-action="close-preview" class="w-full py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-bold transition-colors">
+                <button id="continue-adding-btn" class="w-full py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-bold transition-colors">
                     Continue Adding Gear
                 </button>
             </div>
@@ -232,49 +284,59 @@
     </div>
 
     <script>
-        // Constants
-        const SHEET_ID = '1_AvwvVEFlmxadelY73dG6u1QP1LCKLzEnz3EzWcvlMQ';
-        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
-
-        // App State
-        const state = {
-            data: [], // Array of category objects
-            selected: new Map(), // name => { qty, category }
-            expanded: new Set(), // category IDs that are currently expanded (starts empty!)
-            searchQuery: '',
-            activeCategory: 'all',
-            isDark: false
-        };
-
-        // DOM Elements
         const DOM = {
-            inventoryContainer: document.getElementById('inventory-container'),
-            categorySelect: document.getElementById('category-select'),
+            loadingState: document.getElementById('loading-state'),
+            errorState: document.getElementById('error-state'),
+            emptyState: document.getElementById('empty-state'),
+            categoriesWrapper: document.getElementById('categories-wrapper'),
             searchInput: document.getElementById('search-input'),
             searchDropdown: document.getElementById('search-dropdown'),
+            searchWrapper: document.getElementById('search-wrapper'),
+            categorySelect: document.getElementById('category-select'),
             checkoutBar: document.getElementById('checkout-bar'),
             selectedCount: document.getElementById('selected-count'),
             previewModal: document.getElementById('preview-modal'),
-            modalList: document.getElementById('modal-list'),
-            modalSubtitle: document.getElementById('modal-subtitle'),
+            modalOverlay: document.getElementById('modal-overlay'),
+            modalCount: document.getElementById('modal-count'),
+            modalItemList: document.getElementById('modal-item-list'),
             modalFooter: document.getElementById('modal-footer'),
-            currentYear: document.getElementById('current-year')
+            themeSun: document.getElementById('theme-icon-sun'),
+            themeMoon: document.getElementById('theme-icon-moon'),
         };
 
-        DOM.currentYear.textContent = new Date().getFullYear();
+        const state = {
+            inventoryData: [],
+            selected: new Map(), // Map<itemName, {qty, categoryTitle}>
+            expandedCategories: new Set(), // Empty by default so they start collapsed
+            activeCategory: 'all',
+            searchQuery: ''
+        };
 
-        // Theme Initialization
+        const SHEET_ID = '1_AvwvVEFlmxadelY73dG6u1QP1LCKLzEnz3EzWcvlMQ';
+        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
+
+        // --- Theme Management ---
         function initTheme() {
             const isDarkStored = localStorage.getItem('theme') === 'dark';
             const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             if (isDarkStored || (!localStorage.getItem('theme') && isSystemDark)) {
-                state.isDark = true;
                 document.documentElement.classList.add('dark');
+                DOM.themeSun.classList.remove('hidden');
+                DOM.themeMoon.classList.add('hidden');
+            } else {
+                DOM.themeSun.classList.add('hidden');
+                DOM.themeMoon.classList.remove('hidden');
             }
         }
-        initTheme();
 
-        // CSV Parser
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            DOM.themeSun.classList.toggle('hidden', !isDark);
+            DOM.themeMoon.classList.toggle('hidden', isDark);
+        }
+
+        // --- CSV Parsing ---
         function parseCSV(text) {
             const rows = [];
             let row = [];
@@ -297,15 +359,15 @@
             return rows;
         }
 
-        // Fetch Data
+        // --- Data Fetching ---
         async function fetchInventory() {
             try {
                 const response = await fetch(CSV_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
-                const text = await response.text();
-                const rows = parseCSV(text);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                const csvText = await response.text();
+                const rows = parseCSV(csvText);
                 
-                if (rows.length < 2) throw new Error('No data found');
+                if (rows.length < 2) throw new Error('Empty dataset');
 
                 const headers = rows[0].map(h => h.toLowerCase().trim());
                 const catIdx = headers.indexOf('category');
@@ -316,373 +378,404 @@
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     if (!row || row.length <= Math.max(catIdx, descIdx)) continue;
-                    
                     const category = row[catIdx];
                     const name = row[descIdx];
                     const qty = (qtyIdx !== -1 && row[qtyIdx]) ? row[qtyIdx] : '1';
 
                     if (category && name && isNaN(category)) {
-                        const catId = category.toLowerCase().replace(/[^a-z0-9]/g, '-');
-                        if (!groups[catId]) {
-                            groups[catId] = { id: catId, title: category, items: [] };
+                        if (!groups[category]) {
+                            groups[category] = {
+                                id: category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                                title: category,
+                                items: []
+                            };
                         }
-                        groups[catId].items.push({ name, qty, id: name.replace(/[^a-zA-Z0-9]/g, '') + i });
+                        groups[category].items.push({ name, qty });
                     }
                 }
                 
-                state.data = Object.values(groups);
+                state.inventoryData = Object.values(groups);
+                DOM.loadingState.classList.add('hidden');
+                
                 populateCategoryDropdown();
                 renderInventory();
-            } catch (error) {
-                console.error("Error loading data:", error);
-                DOM.inventoryContainer.innerHTML = `
-                    <div class="p-8 text-center bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-3xl font-bold border border-red-100 dark:border-red-900/30">
-                        Could not load inventory. Please try again later.
-                    </div>
-                `;
+
+            } catch (err) {
+                console.error("Error fetching inventory:", err);
+                DOM.loadingState.classList.add('hidden');
+                DOM.errorState.classList.remove('hidden');
             }
         }
 
-        // Populate Dropdown
         function populateCategoryDropdown() {
-            let options = '<option value="all">All Categories</option>';
-            state.data.forEach(cat => {
-                options += `<option value="${cat.id}">${cat.title}</option>`;
-            });
-            DOM.categorySelect.innerHTML = options;
+            const options = state.inventoryData.map(cat => `<option value="${cat.id}">${cat.title}</option>`).join('');
+            DOM.categorySelect.innerHTML = '<option value="all">All Categories</option>' + options;
         }
 
-        // Main Render Function
+        // --- Rendering Core ---
         function renderInventory() {
-            const q = state.searchQuery.toLowerCase().replace(/\s+/g, '');
-            let html = '';
-
-            const filteredData = state.data
+            const normalizedQuery = state.searchQuery.toLowerCase().replace(/\s+/g, '');
+            
+            const filteredData = state.inventoryData
                 .filter(cat => state.activeCategory === 'all' || cat.id === state.activeCategory)
                 .map(cat => {
-                    const items = cat.items.filter(item => 
-                        !q || item.name.toLowerCase().replace(/\s+/g, '').includes(q)
-                    );
-                    return { ...cat, items };
+                    const filteredItems = cat.items.filter(item => {
+                        if (!state.searchQuery) return true;
+                        return item.name.toLowerCase().replace(/\s+/g, '').includes(normalizedQuery);
+                    });
+                    return { ...cat, items: filteredItems };
                 })
                 .filter(cat => cat.items.length > 0);
 
             if (filteredData.length === 0) {
-                DOM.inventoryContainer.innerHTML = `<div class="py-20 text-center text-slate-400 font-medium">No gear found matching your criteria.</div>`;
+                DOM.categoriesWrapper.innerHTML = '';
+                DOM.emptyState.classList.remove('hidden');
                 return;
             }
 
-            filteredData.forEach(cat => {
-                const isExpanded = state.expanded.has(cat.id);
-                // Check if ALL filtered items in this category are selected
-                const allSelected = cat.items.length > 0 && cat.items.every(item => state.selected.has(item.name));
+            DOM.emptyState.classList.add('hidden');
+            DOM.categoriesWrapper.innerHTML = filteredData.map(cat => {
+                const isExpanded = state.expandedCategories.has(cat.id);
+                const allSelected = cat.items.every(item => state.selected.has(item.name));
                 
-                html += `
-                    <section id="cat-${cat.id}" class="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800/60 overflow-hidden mb-6 transition-all duration-300 hover:shadow-md">
-                        <!-- Header -->
-                        <div data-action="toggle-category-expand" data-id="${cat.id}" class="flex items-center justify-between p-4 sm:p-5 cursor-pointer select-none group bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                            <div class="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0 pr-4 pointer-events-none">
-                                <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-brand/10 dark:group-hover:bg-blue-500/20 group-hover:text-brand dark:group-hover:text-blue-400 transition-all duration-300 ${isExpanded ? 'rotate-180 bg-brand/10 text-brand dark:bg-blue-500/20 dark:text-blue-400' : ''}">
-                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate tracking-tight">${cat.title}</h3>
-                                    <div class="flex items-center space-x-2 mt-0.5">
-                                        <span class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">${cat.items.length} Items</span>
-                                        ${q ? `<span class="text-[10px] bg-brand/10 text-brand px-1.5 rounded">Filtered</span>` : ''}
-                                    </div>
+                return `
+                <section class="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800/60 overflow-hidden mb-6 transition-all duration-300 hover:shadow-md" id="cat-${cat.id}">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between p-4 sm:p-5 cursor-pointer select-none group bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors" onclick="toggleExpansion('${cat.id}')">
+                        <div class="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0 pr-4">
+                            <div class="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-[#110086]/10 dark:group-hover:bg-blue-500/20 group-hover:text-[#110086] dark:group-hover:text-blue-400 transition-all duration-300 ${isExpanded ? 'rotate-180 bg-[#110086]/10 text-[#110086] dark:bg-blue-500/20 dark:text-blue-400' : ''}">
+                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate tracking-tight">${cat.title}</h3>
+                                <div class="flex items-center space-x-2 mt-0.5">
+                                    <span class="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">${cat.items.length} Items</span>
+                                    ${state.searchQuery ? '<span class="text-[10px] bg-brand/10 text-brand px-1.5 rounded">Filtered</span>' : ''}
                                 </div>
                             </div>
-                            <button data-action="toggle-all-category" data-id="${cat.id}" data-selected="${allSelected}" class="relative z-10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 active:scale-95 whitespace-nowrap overflow-hidden ${allSelected ? 'bg-brand text-white border-transparent shadow-md shadow-brand/20' : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-brand/50 dark:hover:border-blue-500/50'}">
-                                ${allSelected ? 'Clear All' : 'Select All'}
-                            </button>
                         </div>
+                        
+                        <button onclick="handleSelectAll(event, '${cat.id}')" class="relative z-10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 active:scale-95 whitespace-nowrap overflow-hidden ${allSelected ? 'bg-[#110086] text-white border-transparent shadow-md shadow-[#110086]/20' : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#110086]/50 dark:hover:border-blue-500/50'}">
+                            ${allSelected ? 'Clear All' : 'Select All'}
+                        </button>
+                    </div>
 
-                        <!-- Grid -->
-                        <div class="category-content ${isExpanded ? 'expanded' : ''}">
-                            <div class="p-4 sm:p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-slate-50/20 dark:bg-transparent">
-                                ${cat.items.map(item => {
-                                    const isSelected = state.selected.has(item.name);
-                                    // Use data attributes heavily to avoid quote escaping issues
-                                    return `
-                                        <div data-action="toggle-item" data-name="${encodeURIComponent(item.name)}" data-qty="${item.qty}" data-cattitle="${encodeURIComponent(cat.title)}" class="relative group flex items-center justify-between p-3 sm:p-4 h-full rounded-2xl border-2 transition-all duration-200 cursor-pointer select-none ${isSelected ? 'bg-blue-50/50 dark:bg-blue-900/20 border-brand dark:border-blue-500 shadow-sm' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-brand/30 dark:hover:border-blue-500/40 hover:shadow-md'}">
-                                            <div class="flex items-center space-x-3 flex-1 min-w-0 pointer-events-none">
-                                                <div class="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'border-brand dark:border-blue-500 bg-brand dark:bg-blue-500 text-white' : 'border-slate-300 dark:border-slate-600 group-hover:border-brand/50 dark:group-hover:border-blue-500/50'}">
-                                                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ${isSelected ? 'scale-100' : 'scale-0'}" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
-                                                </div>
-                                                <span class="text-[13px] sm:text-[15px] font-bold leading-tight truncate transition-colors ${isSelected ? 'text-brand dark:text-blue-100' : 'text-slate-700 dark:text-slate-200'}">${item.name}</span>
-                                            </div>
-                                            ${item.qty && item.qty !== '1' ? `<div class="ml-2 flex-shrink-0 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-[10px] sm:text-xs font-black text-slate-500 dark:text-slate-400 pointer-events-none">x${item.qty}</div>` : ''}
+                    <!-- Grid Content -->
+                    <div class="category-content ${isExpanded ? 'expanded' : ''}">
+                        <div class="p-4 sm:p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-slate-50/20 dark:bg-transparent">
+                            ${cat.items.map((item, idx) => {
+                                const isSelected = state.selected.has(item.name);
+                                // Escape strings for inline handlers
+                                const escapedName = item.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                const escapedCat = cat.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                                
+                                return `
+                                <div onclick="toggleItem('${escapedName}', '${item.qty}', '${escapedCat}')" class="relative group flex items-center justify-between p-3 sm:p-4 h-full rounded-2xl border-2 transition-all duration-200 cursor-pointer select-none ${isSelected ? 'bg-blue-50/50 dark:bg-blue-900/20 border-[#110086] dark:border-blue-500 shadow-sm' : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#110086]/30 dark:hover:border-blue-500/40 hover:shadow-md'}">
+                                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                                        <div class="flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'border-[#110086] dark:border-blue-500 bg-[#110086] dark:bg-blue-500 text-white' : 'border-slate-300 dark:border-slate-600 group-hover:border-[#110086]/50 dark:group-hover:border-blue-500/50'}">
+                                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ${isSelected ? 'scale-100' : 'scale-0'}" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
                                         </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                                        <span class="text-[13px] sm:text-[15px] font-bold leading-tight truncate transition-colors ${isSelected ? 'text-[#110086] dark:text-blue-100' : 'text-slate-700 dark:text-slate-200'}">
+                                            ${item.name}
+                                        </span>
+                                    </div>
+                                    ${item.qty && item.qty !== '1' ? `<div class="ml-2 flex-shrink-0 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-[10px] sm:text-xs font-black text-slate-500 dark:text-slate-400">x${item.qty}</div>` : ''}
+                                </div>
+                                `;
+                            }).join('')}
                         </div>
-                    </section>
+                    </div>
+                </section>
                 `;
-            });
-            
-            DOM.inventoryContainer.innerHTML = html;
+            }).join('');
         }
 
-        function updateCheckoutState() {
+        // --- Interaction Handlers ---
+        function toggleExpansion(catId) {
+            if (state.expandedCategories.has(catId)) {
+                state.expandedCategories.delete(catId);
+            } else {
+                state.expandedCategories.add(catId);
+            }
+            renderInventory();
+        }
+
+        function handleSelectAll(e, catId) {
+            e.stopPropagation(); // Stop expansion toggle
+            
+            // Find category
+            const category = state.inventoryData.find(c => c.id === catId);
+            if (!category) return;
+            
+            // Filter by search query if applicable to respect current view
+            const normalizedQuery = state.searchQuery.toLowerCase().replace(/\s+/g, '');
+            const visibleItems = category.items.filter(item => {
+                if (!state.searchQuery) return true;
+                return item.name.toLowerCase().replace(/\s+/g, '').includes(normalizedQuery);
+            });
+
+            const allSelected = visibleItems.every(item => state.selected.has(item.name));
+            
+            visibleItems.forEach(item => {
+                if (allSelected) {
+                    state.selected.delete(item.name);
+                } else {
+                    state.selected.set(item.name, { qty: item.qty, categoryTitle: category.title });
+                }
+            });
+
+            updateCheckoutBar();
+            renderInventory();
+        }
+
+        function toggleItem(name, qty, categoryTitle) {
+            if (state.selected.has(name)) {
+                state.selected.delete(name);
+            } else {
+                state.selected.set(name, { qty, categoryTitle });
+            }
+            updateCheckoutBar();
+            renderInventory();
+        }
+
+        function updateCheckoutBar() {
             const count = state.selected.size;
             DOM.selectedCount.textContent = count;
             
             if (count > 0) {
-                DOM.checkoutBar.classList.remove('translate-y-full');
+                DOM.checkoutBar.classList.remove('hidden-bar');
+                DOM.checkoutBar.classList.add('visible-bar');
             } else {
-                DOM.checkoutBar.classList.add('translate-y-full');
-                // Auto close modal if open
-                if (!DOM.previewModal.classList.contains('hidden')) {
-                    DOM.previewModal.classList.add('hidden');
-                    DOM.previewModal.classList.remove('flex');
-                }
+                DOM.checkoutBar.classList.add('hidden-bar');
+                DOM.checkoutBar.classList.remove('visible-bar');
             }
         }
 
-        // Event Delegation for all interactive elements
-        document.body.addEventListener('click', (e) => {
-            const target = e.target.closest('[data-action]');
-            if (!target) return;
-            
-            const action = target.dataset.action;
-            
-            if (action === 'toggle-theme') {
-                state.isDark = !state.isDark;
-                if (state.isDark) {
-                    document.documentElement.classList.add('dark');
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    localStorage.setItem('theme', 'light');
-                }
-            }
-            else if (action === 'toggle-category-expand') {
-                const id = target.dataset.id;
-                if (state.expanded.has(id)) state.expanded.delete(id);
-                else state.expanded.add(id);
-                renderInventory();
-            }
-            else if (action === 'toggle-all-category') {
-                e.stopPropagation(); // prevent row click
-                const id = target.dataset.id;
-                const isAllCurrentlySelected = target.dataset.selected === 'true';
-                
-                const cat = state.data.find(c => c.id === id);
-                if (!cat) return;
-                
-                // respect search filter
-                const q = state.searchQuery.toLowerCase().replace(/\s+/g, '');
-                const itemsToProcess = cat.items.filter(item => !q || item.name.toLowerCase().replace(/\s+/g, '').includes(q));
-
-                itemsToProcess.forEach(item => {
-                    if (isAllCurrentlySelected) {
-                        state.selected.delete(item.name);
-                    } else {
-                        state.selected.set(item.name, { qty: item.qty, category: cat.title });
-                    }
-                });
-                
-                renderInventory();
-                updateCheckoutState();
-            }
-            else if (action === 'toggle-item') {
-                const name = decodeURIComponent(target.dataset.name);
-                const qty = target.dataset.qty;
-                const catTitle = decodeURIComponent(target.dataset.cattitle);
-                
-                if (state.selected.has(name)) {
-                    state.selected.delete(name);
-                } else {
-                    state.selected.set(name, { qty, category: catTitle });
-                }
-                renderInventory();
-                updateCheckoutState();
-            }
-            else if (action === 'clear-selection') {
-                state.selected.clear();
-                renderInventory();
-                updateCheckoutState();
-            }
-            else if (action === 'open-preview') {
-                renderModal();
-                DOM.previewModal.classList.remove('hidden');
-                DOM.previewModal.classList.add('flex');
-            }
-            else if (action === 'close-preview') {
-                DOM.previewModal.classList.add('hidden');
-                DOM.previewModal.classList.remove('flex');
-            }
-            else if (action === 'remove-modal-item') {
-                const name = decodeURIComponent(target.dataset.name);
-                state.selected.delete(name);
-                renderModal();
-                renderInventory();
-                updateCheckoutState();
-            }
-            else if (action === 'select-search-item') {
-                const name = decodeURIComponent(target.dataset.name);
-                const qty = target.dataset.qty;
-                const catTitle = decodeURIComponent(target.dataset.cattitle);
-                const catId = target.dataset.catid;
-
-                // Select item
-                state.selected.set(name, { qty, category: catTitle });
-                
-                // Expand the category it belongs to so it's visible
-                state.expanded.add(catId);
-                
-                // Reset search
-                state.searchQuery = '';
-                DOM.searchInput.value = '';
-                DOM.searchDropdown.classList.add('hidden');
-                
-                renderInventory();
-                updateCheckoutState();
-                
-                // Scroll to it
-                setTimeout(() => {
-                    const el = document.getElementById(`cat-${catId}`);
-                    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - 150, behavior: 'smooth' });
-                }, 100);
-            }
-            else if (action === 'send-whatsapp') {
-                sendWhatsApp();
-            }
-            else if (action === 'send-email') {
-                sendEmail();
-            }
-        });
-
-        // Search Input Handling
+        // --- Search Handling ---
         DOM.searchInput.addEventListener('input', (e) => {
-            state.searchQuery = e.target.value;
-            const q = state.searchQuery.toLowerCase().replace(/\s+/g, '');
+            const val = e.target.value;
+            state.searchQuery = val;
             
-            if (!q) {
+            if (!val.trim()) {
                 DOM.searchDropdown.classList.add('hidden');
+                renderInventory();
                 return;
             }
 
-            let results = [];
-            state.data.forEach(cat => {
+            const normalizedQuery = val.toLowerCase().replace(/\s+/g, '');
+            const matches = [];
+            
+            state.inventoryData.forEach(cat => {
                 cat.items.forEach(item => {
-                    if (item.name.toLowerCase().replace(/\s+/g, '').includes(q)) {
-                        results.push({ ...item, categoryTitle: cat.title, categoryId: cat.id });
+                    if (item.name.toLowerCase().replace(/\s+/g, '').includes(normalizedQuery)) {
+                        matches.push({ ...item, categoryTitle: cat.title, catId: cat.id });
                     }
                 });
             });
 
-            if (results.length > 0) {
+            if (matches.length > 0) {
+                DOM.searchDropdown.classList.remove('hidden');
                 let html = `
                     <div class="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md">
-                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Results</span>
-                        <span class="text-[10px] font-black bg-brand/10 dark:bg-blue-500/20 text-brand dark:text-blue-400 px-2 py-0.5 rounded-full">${results.length}</span>
+                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Results for "${val}"</span>
+                        <span class="text-[10px] font-black bg-[#110086]/10 dark:bg-blue-500/20 text-[#110086] dark:text-blue-400 px-2 py-0.5 rounded-full">${matches.length}</span>
                     </div>
                     <div class="py-2">
                 `;
                 
-                results.slice(0, 15).forEach(match => {
-                    html += `
-                        <button data-action="select-search-item" data-name="${encodeURIComponent(match.name)}" data-qty="${match.qty}" data-cattitle="${encodeURIComponent(match.categoryTitle)}" data-catid="${match.categoryId}" class="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/30 last:border-0">
-                            <div class="min-w-0 pr-3">
-                                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${match.name}</p>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wide">${match.categoryTitle}</p>
-                            </div>
-                            <div class="shrink-0 text-[10px] font-black text-brand dark:text-blue-400 bg-brand/5 dark:bg-blue-500/10 px-2 py-1 rounded">SELECT</div>
-                        </button>
+                html += matches.slice(0, 15).map((match, idx) => {
+                    const escapedName = match.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const escapedCat = match.categoryTitle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `
+                    <button onclick="handleSearchSelect('${escapedName}', '${match.qty}', '${escapedCat}', '${match.catId}')" class="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/30 last:border-0">
+                        <div class="min-w-0 pr-3">
+                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${match.name}</p>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wide">${match.categoryTitle}</p>
+                        </div>
+                        <div class="shrink-0 text-[10px] font-black text-[#110086] dark:text-blue-400 bg-[#110086]/5 dark:bg-blue-500/10 px-2 py-1 rounded">
+                            SELECT
+                        </div>
+                    </button>
                     `;
-                });
-                
-                if (results.length > 15) {
-                    html += `<div class="px-4 py-3 text-center text-xs font-bold text-slate-400">+ ${results.length - 15} more. Keep typing.</div>`;
+                }).join('');
+
+                if(matches.length > 15) {
+                    html += `<div class="px-4 py-3 text-center text-xs font-bold text-slate-400">+ ${matches.length - 15} more. Keep typing.</div>`;
                 }
                 
-                html += `</div>`;
+                html += '</div>';
                 DOM.searchDropdown.innerHTML = html;
-                DOM.searchDropdown.classList.remove('hidden');
             } else {
-                DOM.searchDropdown.innerHTML = `<div class="px-4 py-8 text-center text-slate-400 text-sm font-medium">No gear found matching "${state.searchQuery}"</div>`;
+                DOM.searchDropdown.innerHTML = '<div class="px-4 py-8 text-center text-slate-400 text-sm font-medium">No gear found matching this search.</div>';
                 DOM.searchDropdown.classList.remove('hidden');
             }
         });
 
         // Close dropdown when clicking outside
-        document.addEventListener('mousedown', (e) => {
-            const container = document.getElementById('search-container');
-            if (container && !container.contains(e.target)) {
+        document.addEventListener('click', (e) => {
+            if (!DOM.searchWrapper.contains(e.target)) {
                 DOM.searchDropdown.classList.add('hidden');
             }
         });
 
-        // Category Filter Handling
-        DOM.categorySelect.addEventListener('change', (e) => {
-            state.activeCategory = e.target.value;
-            // Expand newly selected category
-            if (state.activeCategory !== 'all') {
-                state.expanded.add(state.activeCategory);
+        DOM.searchInput.addEventListener('focus', () => {
+            if(state.searchQuery.trim() && DOM.searchDropdown.innerHTML !== '') {
+                DOM.searchDropdown.classList.remove('hidden');
             }
-            renderInventory();
         });
 
-        function renderModal() {
-            const entries = Array.from(state.selected.entries());
-            DOM.modalSubtitle.textContent = `${entries.length} Items Selected`;
+        function handleSearchSelect(name, qty, categoryTitle, catId) {
+            state.expandedCategories.add(catId);
             
-            if (entries.length === 0) {
-                DOM.modalList.innerHTML = `
+            if (!state.selected.has(name)) {
+                state.selected.set(name, { qty, categoryTitle });
+                updateCheckoutBar();
+            }
+            
+            DOM.searchDropdown.classList.add('hidden');
+            DOM.searchInput.value = '';
+            state.searchQuery = '';
+            renderInventory();
+
+            setTimeout(() => {
+                const el = document.getElementById(`cat-${catId}`);
+                if (el) {
+                    const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }, 100);
+        }
+
+        // --- Category Filter ---
+        DOM.categorySelect.addEventListener('change', (e) => {
+            state.activeCategory = e.target.value;
+            if (state.activeCategory !== 'all') {
+                state.expandedCategories.add(state.activeCategory);
+            }
+            renderInventory();
+            if (state.activeCategory !== 'all' && !state.searchQuery) {
+                const target = document.getElementById(`cat-${state.activeCategory}`);
+                if (target) {
+                    setTimeout(() => {
+                        window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
+                    }, 50);
+                }
+            }
+        });
+
+        // --- Modal Handling ---
+        function openPreviewModal() {
+            DOM.modalCount.textContent = state.selected.size;
+            
+            if (state.selected.size === 0) {
+                DOM.modalItemList.innerHTML = `
                     <div class="text-center py-12 px-4 flex flex-col items-center">
                         <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </div>
                         <p class="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">Your loadout is empty.<br/>Select items to request a quote.</p>
                     </div>
                 `;
                 DOM.modalFooter.classList.add('hidden');
             } else {
-                DOM.modalList.innerHTML = entries.map(([name, detail]) => `
+                DOM.modalItemList.innerHTML = Array.from(state.selected.entries()).map(([name, detail]) => {
+                    const escapedName = name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const escapedCat = detail.categoryTitle.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    return `
                     <div class="group flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                         <div class="min-w-0 pr-4">
                             <p class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 leading-tight">${name}</p>
                             <div class="flex items-center space-x-2 mt-1">
                                 <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase">QTY: ${detail.qty}</span>
-                                <span class="text-[10px] font-black text-brand/60 dark:text-blue-400/60 uppercase">• ${detail.category}</span>
+                                <span class="text-[10px] font-black text-[#110086]/60 dark:text-blue-400/60 uppercase">• ${detail.categoryTitle}</span>
                             </div>
                         </div>
-                        <button data-action="remove-modal-item" data-name="${encodeURIComponent(name)}" class="p-2 sm:p-2.5 text-red-500/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        <button onclick="removeItemFromModal('${escapedName}', '${escapedCat}')" class="p-2 sm:p-2.5 text-red-500/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                         </button>
                     </div>
-                `).join('');
+                `}).join('');
                 DOM.modalFooter.classList.remove('hidden');
+            }
+            
+            DOM.previewModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closePreviewModal() {
+            DOM.previewModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function removeItemFromModal(name, categoryTitle) {
+            toggleItem(name, null, categoryTitle);
+            openPreviewModal(); // refresh modal content
+            if(state.selected.size === 0) {
+                closePreviewModal();
             }
         }
 
+        DOM.viewListBtn = document.getElementById('view-list-btn');
+        DOM.clearListBtn = document.getElementById('clear-list-btn');
+        DOM.closeModalBtn = document.getElementById('close-modal-btn');
+        DOM.continueAddingBtn = document.getElementById('continue-adding-btn');
+
+        DOM.viewListBtn.addEventListener('click', openPreviewModal);
+        DOM.closeModalBtn.addEventListener('click', closePreviewModal);
+        DOM.continueAddingBtn.addEventListener('click', closePreviewModal);
+        DOM.modalOverlay.addEventListener('click', closePreviewModal);
+        
+        DOM.clearListBtn.addEventListener('click', () => {
+            state.selected.clear();
+            updateCheckoutBar();
+            renderInventory();
+            closePreviewModal();
+        });
+
+        // --- Communication Logic ---
         function generateListString(isHtml = false) {
             const separator = isHtml ? '%0D%0A' : '%0A';
-            return Array.from(state.selected.entries())
-                .map(([name, detail]) => `• ${name} (x${detail.qty})`)
-                .join(separator);
+            
+            // Group items by category
+            const grouped = {};
+            for (const [name, detail] of state.selected.entries()) {
+                if (!grouped[detail.categoryTitle]) {
+                    grouped[detail.categoryTitle] = [];
+                }
+                grouped[detail.categoryTitle].push(`  • ${name} (x${detail.qty})`);
+            }
+
+            // Build string
+            const result = [];
+            for (const category of Object.keys(grouped).sort()) {
+                result.push(`*${category}*`);
+                result.push(...grouped[category]);
+                result.push(''); // blank line
+            }
+            
+            return result.join(separator).trim();
         }
 
-        function sendWhatsApp() {
+        document.getElementById('whatsapp-btn').addEventListener('click', () => {
             if (state.selected.size === 0) return;
             const list = generateListString(false);
             const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following items:%0A%0A${list}%0A%0APlease share availability and a quote.`;
             window.open(`https://wa.me/919650563719?text=${message}`, '_blank');
-        }
+        });
 
-        function sendEmail() {
+        document.getElementById('email-btn').addEventListener('click', () => {
             if (state.selected.size === 0) return;
             const list = generateListString(true);
             const subject = "Rental Inquiry: Polar Bear Films";
             const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment:%0D%0A%0D%0A${list}%0D%0A%0D%0APlease let me know the rental rates and availability.%0D%0A%0D%0ABest regards.`;
             window.location.href = `mailto:himanshusharma280@gmail.com?subject=${subject}&body=${body}`;
-        }
+        });
 
-        // Start App
-        fetchInventory();
+        // --- Initialization ---
+        window.onload = () => {
+            initTheme();
+            fetchInventory();
+        };
     </script>
 </body>
 </html>
