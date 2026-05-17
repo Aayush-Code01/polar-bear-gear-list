@@ -1,638 +1,799 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Gear Inventory | Polar Bear Films</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1G4op79FMnkfDaYsHYqCwToCgzi2HOdVp">
-    
-    <!-- Meta Tags for Social Media / WhatsApp Sharing -->
-    <meta property="og:title" content="Gear Inventory | Polar Bear Films">
-    <meta property="og:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
-    <meta property="og:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:type" content="website">
-    
-    <!-- Twitter Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Gear Inventory | Polar Bear Films">
-    <meta name="twitter:description" content="Professional cinematography gear rental. Select your kit and get an instant quote.">
-    <meta name="twitter:image" content="https://lh3.googleusercontent.com/d/1DwixbHZFc9IuMHIJoFeHq-MQB5oy5R5_">
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: '#110086',
-                    },
-                    fontFamily: {
-                        jakarta: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    }
-                }
+// --- Icons (Inline SVGs to ensure portability) ---
+const Icons = {
+  Sun: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+    </svg>
+  ),
+  Moon: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  ),
+  Phone: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+    </svg>
+  ),
+  Search: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+  ),
+  ChevronDown: ({ className = "w-5 h-5" }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+    </svg>
+  ),
+  Check: ({ className = "w-5 h-5" }) => (
+    <svg className={className} fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+    </svg>
+  ),
+  X: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  ),
+  WhatsApp: () => (
+    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+  ),
+  Mail: () => (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  ),
+  Clear: () => (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+  )
+};
+
+const BRAND_COLOR = '#110086';
+const SHEET_ID = '1_AvwvVEFlmxadelY73dG6u1QP1LCKLzEnz3EzWcvlMQ';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
+
+const useTheme = () => {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check initial preference
+    const isDarkStored = localStorage.getItem('theme') === 'dark';
+    const isSystemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDarkStored || (!localStorage.getItem('theme') && isSystemDark)) {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      if (next) {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+      return next;
+    });
+  };
+
+  return { isDark, toggleTheme };
+};
+
+// Robust CSV Parser
+const parseCSV = (text) => {
+  const rows = [];
+  let row = [];
+  let cur = '';
+  let inQuote = false;
+  for (let i = 0; i < text.length; i++) {
+    let char = text[i];
+    let next = text[i + 1];
+    if (char === '"' && inQuote && next === '"') { cur += '"'; i++; }
+    else if (char === '"') { inQuote = !inQuote; }
+    else if (char === ',' && !inQuote) { row.push(cur.trim()); cur = ''; }
+    else if ((char === '\r' || char === '\n') && !inQuote) {
+      row.push(cur.trim());
+      if (row.length > 0) rows.push(row);
+      row = []; cur = '';
+      if (char === '\r' && next === '\n') i++;
+    } else { cur += char; }
+  }
+  if (cur !== '' || row.length > 0) { row.push(cur.trim()); rows.push(row); }
+  return rows;
+};
+
+const useInventoryData = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const csvText = await response.text();
+        const rows = parseCSV(csvText);
+        
+        if (rows.length < 2) {
+          setData([]);
+          return;
+        }
+
+        const headers = rows[0].map(h => h.toLowerCase().trim());
+        const catIdx = headers.indexOf('category');
+        const descIdx = headers.indexOf('description');
+        const qtyIdx = headers.indexOf('qty');
+
+        const groups = {};
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length <= Math.max(catIdx, descIdx)) continue;
+          const category = row[catIdx];
+          const name = row[descIdx];
+          const qty = (qtyIdx !== -1 && row[qtyIdx]) ? row[qtyIdx] : '1';
+
+          if (category && name && isNaN(category)) {
+            if (!groups[category]) {
+              groups[category] = {
+                id: category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                title: category,
+                items: []
+              };
             }
+            groups[category].items.push({ name, qty });
+          }
         }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: #fcfcfd; 
-            color: #0f172a; 
-            -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+        setData(Object.values(groups));
+      } catch (err) {
+        console.error("Error fetching inventory:", err);
+        setError("Could not load inventory. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-        .dark body {
-            background-color: #020617;
-            color: #f8fafc;
-        }
+  return { data, loading, error };
+};
+
+const Header = ({ isDark, toggleTheme }) => (
+  <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+      <div className="flex items-center h-8 sm:h-12 w-auto">
+        <img 
+          src="https://lh3.googleusercontent.com/d/18GG_sRWwFyK_or7uQDR2FE4oItbIpEZ1" 
+          alt="Polar Bear Films" 
+          className="h-full object-contain transition-all dark:filter dark:brightness-0 dark:invert"
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'flex';
+          }}
+        />
+        <div className="hidden bg-[#110086] dark:bg-blue-600 text-white px-3 py-1.5 rounded-lg font-black text-sm sm:text-base tracking-wider items-center justify-center">
+          PBF
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2 sm:space-x-4">
+        <button 
+          onClick={toggleTheme} 
+          className="p-2 sm:p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
+          aria-label="Toggle Theme"
+        >
+          {isDark ? <Icons.Moon /> : <Icons.Sun />}
+        </button>
         
-        .sticky-footer { 
-            position: fixed; 
-            bottom: 0; 
-            left: 0; 
-            right: 0; 
-            background: rgba(255, 255, 255, 0.98); 
-            backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(17, 0, 134, 0.08);
-            z-index: 50;
-            transform: translateY(100%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 -15px 40px -10px rgba(17, 0, 134, 0.1);
+        <a 
+          href="tel:+919650563719" 
+          className="group flex items-center space-x-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-[#110086]/5 dark:bg-blue-500/10 rounded-xl hover:bg-[#110086]/10 dark:hover:bg-blue-500/20 transition-all duration-300 active:scale-95"
+        >
+          <div className="text-[#110086] dark:text-blue-400 group-hover:scale-110 transition-transform">
+            <Icons.Phone />
+          </div>
+          <span className="text-xs sm:text-sm font-bold text-[#110086] dark:text-blue-400 tracking-tight">+91 96505 63719</span>
+        </a>
+      </div>
+    </div>
+  </header>
+);
+
+const ShimmerLoading = () => (
+  <div className="space-y-4 sm:space-y-6 mt-8 animate-pulse">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl h-16 sm:h-20 w-full overflow-hidden relative">
+        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/5 to-transparent animate-[shimmer_1.5s_infinite]"></div>
+      </div>
+    ))}
+  </div>
+);
+
+const ItemCard = ({ item, isSelected, onToggle }) => {
+  return (
+    <div 
+      onClick={() => onToggle(item)}
+      className={`
+        relative group flex items-center justify-between p-3 sm:p-4 h-full
+        rounded-2xl border-2 transition-all duration-200 cursor-pointer select-none
+        ${isSelected 
+          ? 'bg-blue-50/50 dark:bg-blue-900/20 border-[#110086] dark:border-blue-500 shadow-sm' 
+          : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 hover:border-[#110086]/30 dark:hover:border-blue-500/40 hover:shadow-md'
         }
+      `}
+    >
+      <div className="flex items-center space-x-3 flex-1 min-w-0">
+        <div className={`
+          flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300
+          ${isSelected 
+            ? 'border-[#110086] dark:border-blue-500 bg-[#110086] dark:bg-blue-500 text-white' 
+            : 'border-slate-300 dark:border-slate-600 group-hover:border-[#110086]/50 dark:group-hover:border-blue-500/50'
+          }
+        `}>
+          <Icons.Check className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 ${isSelected ? 'scale-100' : 'scale-0'}`} />
+        </div>
+        <span className={`text-[13px] sm:text-[15px] font-bold leading-tight truncate transition-colors
+          ${isSelected ? 'text-[#110086] dark:text-blue-100' : 'text-slate-700 dark:text-slate-200'}
+        `}>
+          {item.name}
+        </span>
+      </div>
+      {item.qty && item.qty !== '1' && (
+        <div className="ml-2 flex-shrink-0 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-[10px] sm:text-xs font-black text-slate-500 dark:text-slate-400">
+          x{item.qty}
+        </div>
+      )}
+    </div>
+  );
+};
 
-        .dark .sticky-footer {
-            background: rgba(15, 23, 42, 0.98);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 -15px 40px -10px rgba(0, 0, 0, 0.4);
+const Controls = ({ 
+  categories, 
+  activeCategory, 
+  setActiveCategory, 
+  searchQuery, 
+  setSearchQuery,
+  onSearchSelect
+}) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [wrapperRef]);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase().replace(/\s+/g, '');
+    let results = [];
+    categories.forEach(cat => {
+      cat.items.forEach(item => {
+        if (item.name.toLowerCase().replace(/\s+/g, '').includes(query)) {
+          results.push({ ...item, categoryTitle: cat.title, categoryId: cat.id });
         }
+      });
+    });
+    return results;
+  }, [searchQuery, categories]);
 
-        .sticky-footer.visible { transform: translateY(0); }
-        
-        .item-card {
-            transition: all 0.2s ease;
-        }
-        
-        input[type="checkbox"]:checked + label {
-            background-color: #fff;
-            border-color: #110086;
-            box-shadow: 0 0 0 1px #110086, 0 10px 15px -3px rgba(17, 0, 134, 0.05);
-        }
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setIsDropdownOpen(true);
+  };
 
-        .dark input[type="checkbox"]:checked + label {
-            background-color: #1e293b;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6, 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-        }
-
-        input[type="checkbox"]:checked + label .check-icon {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #110086; border-radius: 10px; }
-
-        .shimmer {
-            background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
-
-        .dark .shimmer {
-            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23110086'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1rem;
-        }
-
-        .dark select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        }
-
-        /* Modal animations */
-        #preview-modal.hidden { display: none; }
-        #preview-modal.visible { display: flex; }
-
-        /* Search dropdown styles */
-        #search-results-dropdown {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-    </style>
-</head>
-<body class="pb-32 sm:pb-40">
-
-    <!-- Header -->
-    <header class="bg-white dark:bg-slate-900 border-b border-gray-100 dark:border-slate-800 sticky top-0 z-40 transition-colors">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-            <div class="flex items-center">
-                <div class="h-8 sm:h-12 w-auto flex items-center">
-                    <img src="https://lh3.googleusercontent.com/d/18GG_sRWwFyK_or7uQDR2FE4oItbIpEZ1" 
-                         alt="Polar Bear Films" 
-                         class="h-full object-contain transition-all dark:[filter:brightness(0)_invert(1)]"
-                         onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-brand text-white px-2 py-1 rounded font-bold text-sm\'>PBF</div>'">
-                </div>
+  return (
+    <div className="sticky top-[64px] sm:top-[80px] z-30 bg-slate-50/90 dark:bg-[#020617]/90 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 py-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none sm:border-none sm:py-0">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-4xl">
+        {/* Search Wrapper */}
+        <div className="relative flex-1" ref={wrapperRef}>
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#110086] dark:group-focus-within:text-blue-500 transition-colors">
+              <Icons.Search />
             </div>
-            
-            <div class="flex items-center space-x-1.5 sm:space-x-4">
-                <!-- Theme Toggle -->
-                <button onclick="toggleDarkMode()" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
-                    <svg id="sun-icon" class="w-5 h-5 text-brand dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
-                    <svg id="moon-icon" class="w-5 h-5 text-slate-300 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onFocus={() => setIsDropdownOpen(true)}
+              placeholder="Search gear (e.g. Ronin 2, Alexa...)" 
+              className="w-full bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-semibold rounded-2xl pl-12 pr-4 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-[#110086] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#110086]/10 dark:focus:ring-blue-500/10 transition-all placeholder:text-slate-400/80 placeholder:font-medium"
+            />
+          </div>
+
+          {/* Search Dropdown */}
+          {isDropdownOpen && searchQuery.trim() && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-50 max-h-[60vh] overflow-y-auto overflow-hidden flex flex-col">
+              {searchResults.length > 0 ? (
+                <>
+                  <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 z-10 backdrop-blur-md">
+                    <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Results for "{searchQuery}"</span>
+                    <span className="text-[10px] font-black bg-[#110086]/10 dark:bg-blue-500/20 text-[#110086] dark:text-blue-400 px-2 py-0.5 rounded-full">{searchResults.length}</span>
+                  </div>
+                  <div className="py-2">
+                    {searchResults.slice(0, 15).map((match, idx) => (
+                      <button 
+                        key={idx}
+                        onClick={() => {
+                          onSearchSelect(match);
+                          setIsDropdownOpen(false);
+                          setSearchQuery('');
+                        }}
+                        className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/30 last:border-0"
+                      >
+                        <div className="min-w-0 pr-3">
+                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{match.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-0.5 tracking-wide">{match.categoryTitle}</p>
+                        </div>
+                        <div className="shrink-0 text-[10px] font-black text-[#110086] dark:text-blue-400 bg-[#110086]/5 dark:bg-blue-500/10 px-2 py-1 rounded">
+                          SELECT
+                        </div>
+                      </button>
+                    ))}
+                    {searchResults.length > 15 && (
+                      <div className="px-4 py-3 text-center text-xs font-bold text-slate-400">
+                        + {searchResults.length - 15} more. Keep typing to narrow down.
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="px-4 py-8 text-center text-slate-400 text-sm font-medium">
+                  No gear found matching "{searchQuery}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Category Select */}
+        <div className="relative shrink-0 sm:w-64 group">
+          <select 
+            value={activeCategory}
+            onChange={(e) => setActiveCategory(e.target.value)}
+            className="w-full appearance-none bg-white dark:bg-slate-900 border-2 border-transparent text-slate-800 dark:text-slate-100 text-sm sm:text-base font-bold rounded-2xl pl-4 pr-10 py-3.5 sm:py-4 shadow-sm focus:outline-none focus:border-[#110086] dark:focus:border-blue-500 focus:ring-4 focus:ring-[#110086]/10 dark:focus:ring-blue-500/10 transition-all cursor-pointer"
+          >
+            <option value="all">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.title}</option>
+            ))}
+          </select>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400 group-hover:text-[#110086] dark:group-hover:text-blue-400 transition-colors">
+            <Icons.ChevronDown />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CategorySection = ({ 
+  category, 
+  searchQuery, 
+  selectedItems, 
+  onToggleItem,
+  isInitiallyExpanded,
+  onExpansionChange
+}) => {
+  const [isExpanded, setIsExpanded] = useState(isInitiallyExpanded);
+
+  // Sync state if forced from outside (like search selection)
+  useEffect(() => {
+    if (isInitiallyExpanded) setIsExpanded(true);
+  }, [isInitiallyExpanded]);
+
+  const toggleExpand = () => {
+    const nextState = !isExpanded;
+    setIsExpanded(nextState);
+    if (onExpansionChange) onExpansionChange(category.id, nextState);
+  };
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery) return category.items;
+    const q = searchQuery.toLowerCase().replace(/\s+/g, '');
+    return category.items.filter(item => item.name.toLowerCase().replace(/\s+/g, '').includes(q));
+  }, [category.items, searchQuery]);
+
+  if (filteredItems.length === 0) return null;
+
+  const allSelected = filteredItems.every(item => selectedItems[item.name]);
+
+  const handleSelectAll = (e) => {
+    e.stopPropagation();
+    filteredItems.forEach(item => {
+      // If all are selected, we want to DESELECT them
+      if (allSelected) {
+        onToggleItem(item, true); // true flag for 'force remove'
+      } else {
+        // Otherwise, SELECT them if not already selected
+        if (!selectedItems[item.name]) {
+          onToggleItem(item, false); // false flag for 'force add'
+        }
+      }
+    });
+  };
+
+  return (
+    <section className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800/60 overflow-hidden mb-6 transition-all duration-300 hover:shadow-md">
+      {/* Header */}
+      <div 
+        onClick={toggleExpand}
+        className="flex items-center justify-between p-4 sm:p-5 cursor-pointer select-none group bg-slate-50/50 dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+      >
+        <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0 pr-4">
+          <div className={`p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-[#110086]/10 dark:group-hover:bg-blue-500/20 group-hover:text-[#110086] dark:group-hover:text-blue-400 transition-all duration-300 ${isExpanded ? 'rotate-180 bg-[#110086]/10 text-[#110086] dark:bg-blue-500/20 dark:text-blue-400' : ''}`}>
+            <Icons.ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white truncate tracking-tight">{category.title}</h3>
+            <div className="flex items-center space-x-2 mt-0.5">
+              <span className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-wider">{filteredItems.length} Items</span>
+              {searchQuery && <span className="text-[10px] bg-brand/10 text-brand px-1.5 rounded">Filtered</span>}
+            </div>
+          </div>
+        </div>
+        
+        <button 
+          onClick={handleSelectAll}
+          className={`
+            relative z-10 px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider transition-all duration-200 active:scale-95 whitespace-nowrap overflow-hidden
+            ${allSelected 
+              ? 'bg-[#110086] text-white border-transparent shadow-md shadow-[#110086]/20' 
+              : 'bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#110086]/50 dark:hover:border-blue-500/50'
+            }
+          `}
+        >
+          {allSelected ? 'Clear All' : 'Select All'}
+        </button>
+      </div>
+
+      {/* Grid Content */}
+      <div 
+        className={`
+          transition-all duration-300 ease-in-out origin-top
+          ${isExpanded ? 'opacity-100 max-h-[5000px]' : 'opacity-0 max-h-0'}
+        `}
+      >
+        <div className="p-4 sm:p-5 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 bg-slate-50/20 dark:bg-transparent">
+          {filteredItems.map((item, idx) => (
+            <ItemCard 
+              key={`${item.name}-${idx}`} 
+              item={item} 
+              isSelected={!!selectedItems[item.name]} 
+              onToggle={onToggleItem} 
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const PreviewModal = ({ isOpen, onClose, selectedItems, onRemoveItem }) => {
+  if (!isOpen) return null;
+
+  const entries = Object.entries(selectedItems);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+      <div 
+        className="absolute inset-0" 
+        onClick={onClose}
+      ></div>
+      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl flex flex-col max-h-[85vh] overflow-hidden animate-[scale-in_0.2s_ease-out]">
+        <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
+          <div>
+            <h3 className="font-extrabold text-xl sm:text-2xl text-slate-900 dark:text-white tracking-tight">Your Loadout</h3>
+            <p className="text-xs font-bold text-[#110086] dark:text-blue-400 mt-1 uppercase tracking-wider">{entries.length} Items Selected</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="p-2 -mr-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 transition-colors"
+          >
+            <Icons.X />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-2 sm:space-y-3 custom-scrollbar">
+          {entries.length === 0 ? (
+            <div className="text-center py-12 px-4 flex flex-col items-center">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4">
+                <Icons.Search />
+              </div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base">Your loadout is empty.<br/>Select items to request a quote.</p>
+            </div>
+          ) : (
+            entries.map(([name, detail]) => (
+              <div key={name} className="group flex items-center justify-between p-3 sm:p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                <div className="min-w-0 pr-4">
+                  <p className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 leading-tight">{name}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase">QTY: {detail.qty}</span>
+                    <span className="text-[10px] font-black text-[#110086]/60 dark:text-blue-400/60 uppercase">• {detail.category}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => onRemoveItem(name)} 
+                  className="p-2 sm:p-2.5 text-red-500/70 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                  aria-label="Remove item"
+                >
+                  <Icons.Clear />
                 </button>
+              </div>
+            ))
+          )}
+        </div>
+        
+        {entries.length > 0 && (
+          <div className="p-4 sm:p-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.05)] z-10">
+            <button 
+              onClick={onClose} 
+              className="w-full py-3.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-sm font-bold transition-colors"
+            >
+              Continue Adding Gear
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-                <a href="tel:+919650563719" class="flex items-center space-x-1.5 px-2.5 py-1.5 bg-brand/5 dark:bg-brand/20 rounded-lg hover:bg-brand/10 transition-colors">
-                    <svg class="w-3.5 h-3.5 text-brand dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                    </svg>
-                    <span class="text-xs sm:text-sm font-bold text-brand dark:text-blue-400 tracking-tight">+91 96505 63719</span>
-                </a>
+const CheckoutBar = ({ selectedCount, onViewSelection, onClear, onWhatsApp, onEmail }) => {
+  const isVisible = selectedCount > 0;
+
+  return (
+    <div 
+      className={`
+        fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 pointer-events-none transition-transform duration-500 ease-out
+        ${isVisible ? 'translate-y-0' : 'translate-y-full'}
+      `}
+    >
+      <div className="max-w-4xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl shadow-[0_20px_40px_-10px_rgba(17,0,134,0.15)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-auto">
+        
+        {/* Info Section */}
+        <div className="flex items-center space-x-4 w-full sm:w-auto">
+          <div className="relative shrink-0">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#110086] to-blue-600 dark:from-blue-500 dark:to-blue-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <span className="text-xl sm:text-2xl font-black text-white">{selectedCount}</span>
             </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div class="max-w-4xl mb-8 sm:mb-12 px-1 text-center sm:text-left">
-            <h2 class="text-3xl sm:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 sm:mb-6 leading-[1.1]">
-                Production <span class="text-brand dark:text-blue-500 italic">Ready.</span>
-            </h2>
-            <p class="text-[15px] sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                Professional cinematography gear rental. Select your items to receive an instant quotation.
-            </p>
-        </div>
-
-        <!-- Filters Section -->
-        <div class="sticky top-16 sm:top-20 z-30 bg-[#fcfcfd]/90 dark:bg-slate-950/90 backdrop-blur-md -mx-4 px-4 py-4 sm:-mx-6 sm:px-6 border-b border-slate-100 dark:border-slate-800 sm:border-none">
-            <div class="max-w-xl mx-auto sm:mx-0 flex flex-col gap-3">
-                <!-- Search Bar -->
-                <div class="relative group flex-1">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500 group-focus-within:text-brand dark:group-focus-within:text-blue-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </div>
-                    <input type="text" id="gear-search" oninput="handleSearch(this.value)" placeholder="Search gear (e.g. Ronin 2, Alexa Mini...)" 
-                           autocomplete="off"
-                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-base sm:text-sm font-semibold rounded-xl pl-10 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all shadow-sm placeholder:text-slate-400">
-                    
-                    <!-- Search Results Dropdown -->
-                    <div id="search-results-dropdown" class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden custom-scrollbar">
-                        <!-- Dropdown items will be injected here -->
-                    </div>
-                </div>
-
-                <!-- Category Dropdown -->
-                <div class="flex items-center gap-3">
-                    <div class="flex-1">
-                        <select id="category-select" onchange="setActiveCategory(this.value)" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-base sm:text-xs font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-4 focus:ring-brand/5 dark:focus:ring-blue-500/10 focus:border-brand dark:focus:border-blue-500 transition-all cursor-pointer shadow-sm">
-                            <option value="all">All Categories</option>
-                        </select>
-                    </div>
-                </div>
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-white dark:border-slate-900 animate-pulse"></div>
+          </div>
+          <div className="flex-1">
+            <h4 className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white leading-tight">Ready for Quote</h4>
+            <div className="flex items-center space-x-3 mt-0.5">
+              <button onClick={onViewSelection} className="text-[11px] sm:text-xs font-black text-[#110086] dark:text-blue-400 hover:text-blue-700 transition-colors uppercase tracking-wider underline decoration-[#110086]/30 underline-offset-4">
+                View List
+              </button>
+              <span className="w-1 h-1 bg-slate-300 dark:bg-slate-700 rounded-full"></span>
+              <button onClick={onClear} className="text-[11px] sm:text-xs font-black text-slate-500 hover:text-red-500 transition-colors uppercase tracking-wider">
+                Clear
+              </button>
             </div>
+          </div>
         </div>
 
-        <div id="inventory-container" class="space-y-10 sm:space-y-4 mt-6 sm:mt-10">
-            <!-- Loading states -->
-            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
-            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
-            <div class="h-16 rounded-2xl shimmer opacity-30 mb-2"></div>
+        {/* Actions Section */}
+        <div className="flex w-full sm:w-auto gap-2 sm:gap-3">
+          <button 
+            onClick={onWhatsApp}
+            className="flex-1 sm:flex-none flex items-center justify-center space-x-2 bg-[#25D366] hover:bg-[#20bd5a] text-white px-5 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md shadow-[#25D366]/20"
+          >
+            <Icons.WhatsApp />
+            <span className="hidden sm:inline">WhatsApp</span>
+          </button>
+          <button 
+            onClick={onEmail}
+            className="flex-[2] sm:flex-none flex items-center justify-center space-x-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 px-6 py-3.5 sm:py-4 rounded-xl text-sm font-extrabold transition-all active:scale-95 shadow-md"
+          >
+            <Icons.Mail />
+            <span>Email Quote</span>
+          </button>
         </div>
-    </main>
+      </div>
+    </div>
+  );
+};
 
-    <!-- Footer -->
-    <footer class="max-w-7xl mx-auto px-4 sm:px-6 py-12 border-t border-slate-100 dark:border-slate-800 transition-colors text-center">
-        <p class="text-[10px] sm:text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-relaxed">
-            © 2026 POLAR BEAR FILMS PRIVATE LIMITED
+export default function App() {
+  const { isDark, toggleTheme } = useTheme();
+  const { data: categories, loading, error } = useInventoryData();
+  
+  const [selectedItems, setSelectedItems] = useState({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const handleToggleItem = useCallback((item, forceRemove = false) => {
+    setSelectedItems(prev => {
+      const newSelections = { ...prev };
+      if (forceRemove) {
+        delete newSelections[item.name];
+      } else if (newSelections[item.name]) {
+        // Toggle off if it exists and not forcing add/remove specifically
+        delete newSelections[item.name];
+      } else {
+        // Find category name for context in modal
+        const catObj = categories.find(c => c.items.some(i => i.name === item.name));
+        newSelections[item.name] = { qty: item.qty, category: catObj ? catObj.title : 'General' };
+      }
+      return newSelections;
+    });
+  }, [categories]);
+
+  const handleRemoveFromPreview = useCallback((name) => {
+    setSelectedItems(prev => {
+      const next = { ...prev };
+      delete next[name];
+      // Close modal if last item removed
+      if (Object.keys(next).length === 0) setIsPreviewOpen(false);
+      return next;
+    });
+  }, []);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedItems({});
+    setIsPreviewOpen(false);
+  }, []);
+
+  const handleSearchSelect = useCallback((matchItem) => {
+    // Ensure category is expanded
+    setExpandedCategories(prev => ({ ...prev, [matchItem.categoryId]: true }));
+    // Clear search filter so category isn't filtered to just that item (optional UX choice, but usually better to see context)
+    // Actually, keeping the search query might be confusing if they just selected one item. Let's clear it.
+    
+    // Add item if not already selected
+    setSelectedItems(prev => {
+      if (!prev[matchItem.name]) {
+        return { ...prev, [matchItem.name]: { qty: matchItem.qty, category: matchItem.categoryTitle } };
+      }
+      return prev;
+    });
+
+    // Scroll to category (simplified, assumes id matches element id)
+    setTimeout(() => {
+      const el = document.getElementById(`cat-${matchItem.categoryId}`);
+      if (el) {
+        const y = el.getBoundingClientRect().top + window.pageYOffset - 150;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }, 100);
+  }, []);
+
+  const generateListString = (isHtml = false) => {
+    const separator = isHtml ? '%0D%0A' : '%0A';
+    return Object.entries(selectedItems)
+      .map(([name, detail]) => `• ${name} (x${detail.qty})`)
+      .join(separator);
+  };
+
+  const handleWhatsApp = () => {
+    if (Object.keys(selectedItems).length === 0) return;
+    const list = generateListString(false);
+    const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following items:%0A%0A${list}%0A%0APlease share availability and a quote.`;
+    window.open(`https://wa.me/919650563719?text=${message}`, '_blank');
+  };
+
+  const handleEmail = () => {
+    if (Object.keys(selectedItems).length === 0) return;
+    const list = generateListString(true);
+    const subject = "Rental Inquiry: Polar Bear Films";
+    const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment:%0D%0A%0D%0A${list}%0D%0A%0D%0APlease let me know the rental rates and availability.%0D%0A%0D%0ABest regards.`;
+    window.location.href = `mailto:himanshusharma280@gmail.com?subject=${subject}&body=${body}`;
+  };
+
+  const visibleCategories = categories.filter(cat => activeCategory === 'all' || cat.id === activeCategory);
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 font-sans selection:bg-[#110086]/20 selection:text-[#110086] dark:selection:bg-blue-500/30 transition-colors duration-300 pb-32 sm:pb-40">
+      
+      {/* Required CSS for animations not natively in standard Tailwind without plugins */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        @keyframes shimmer { 100% { transform: translateX(100%); } }
+        @keyframes scale-in { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+      `}</style>
+
+      <Header isDark={isDark} toggleTheme={toggleTheme} />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16">
+        
+        {/* Hero Section */}
+        <div className="max-w-3xl mb-10 sm:mb-16 text-left relative">
+          <div className="absolute -top-20 -left-20 w-64 h-64 bg-[#110086]/10 dark:bg-blue-600/20 rounded-full blur-[80px] pointer-events-none"></div>
+          <h1 className="text-5xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 sm:mb-6 leading-[1.05] relative z-10">
+            Production <br className="sm:hidden" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#110086] to-blue-500 dark:from-blue-400 dark:to-blue-600">Ready.</span>
+          </h1>
+          <p className="text-base sm:text-xl text-slate-500 dark:text-slate-400 leading-relaxed font-semibold max-w-2xl">
+            Professional cinematography gear rental. Curate your loadout to receive an instant quotation.
+          </p>
+        </div>
+
+        <Controls 
+          categories={categories}
+          activeCategory={activeCategory}
+          setActiveCategory={setActiveCategory}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onSearchSelect={handleSearchSelect}
+        />
+
+        {/* Inventory List */}
+        <div className="mt-8 sm:mt-12 min-h-[50vh]">
+          {loading ? (
+            <ShimmerLoading />
+          ) : error ? (
+            <div className="p-8 text-center bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-3xl font-bold border border-red-100 dark:border-red-900/30">
+              {error}
+            </div>
+          ) : visibleCategories.length === 0 ? (
+            <div className="py-20 text-center text-slate-400 font-medium">
+              No categories found.
+            </div>
+          ) : (
+            <div>
+              {visibleCategories.map(cat => (
+                <div id={`cat-${cat.id}`} key={cat.id}>
+                  <CategorySection 
+                    category={cat}
+                    searchQuery={searchQuery}
+                    selectedItems={selectedItems}
+                    onToggleItem={handleToggleItem}
+                    isInitiallyExpanded={!!expandedCategories[cat.id]}
+                    onExpansionChange={(id, state) => setExpandedCategories(prev => ({...prev, [id]: state}))}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="max-w-7xl mx-auto px-4 sm:px-6 py-12 mt-10 border-t border-slate-200 dark:border-slate-800/50 text-center">
+        <p className="text-[10px] sm:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+          © {new Date().getFullYear()} POLAR BEAR FILMS PRIVATE LIMITED
         </p>
-    </footer>
+      </footer>
 
-    <!-- Selection Preview Modal -->
-    <div id="preview-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/40 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-in zoom-in duration-200">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                <h3 class="font-extrabold text-xl text-slate-900 dark:text-white">Your Selection</h3>
-                <button onclick="closePreview()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-            </div>
-            <div id="preview-list" class="flex-1 overflow-y-auto p-6 space-y-3 custom-scrollbar">
-                <!-- Items injected here -->
-            </div>
-            <div class="p-6 bg-slate-50 dark:bg-slate-950/50 border-t border-slate-100 dark:border-slate-800">
-                <div class="grid grid-cols-2 gap-3">
-                    <button onclick="sendWhatsApp()" class="bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center">WhatsApp</button>
-                    <button onclick="sendEmail()" class="bg-brand text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center">Email</button>
-                </div>
-            </div>
-        </div>
+      {/* Floating UI Elements */}
+      <CheckoutBar 
+        selectedCount={Object.keys(selectedItems).length}
+        onViewSelection={() => setIsPreviewOpen(true)}
+        onClear={handleClearSelection}
+        onWhatsApp={handleWhatsApp}
+        onEmail={handleEmail}
+      />
+
+      <PreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        selectedItems={selectedItems}
+        onRemoveItem={handleRemoveFromPreview}
+      />
+
     </div>
-
-    <!-- Inquiry Bar -->
-    <div id="inquiry-bar" class="sticky-footer px-4 py-4 sm:py-6">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6">
-            <div class="flex items-center space-x-3 sm:space-x-5 w-full md:w-auto">
-                <div class="bg-brand text-white w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl shadow-brand/20 shrink-0">
-                    <span id="selected-count" class="text-lg sm:text-2xl font-extrabold">0</span>
-                </div>
-                <div class="flex-1">
-                    <h4 class="font-bold text-sm sm:text-lg text-slate-900 dark:text-white tracking-tight">Selection List</h4>
-                    <div class="flex items-center space-x-3">
-                        <button onclick="clearSelection()" class="text-[9px] sm:text-[10px] font-black text-red-500 hover:text-red-600 tracking-[0.1em] uppercase transition-colors block">Clear List</button>
-                        <button onclick="openPreview()" class="text-[9px] sm:text-[10px] font-black text-brand dark:text-blue-400 hover:opacity-80 tracking-[0.1em] uppercase transition-colors block underline decoration-brand/30 underline-offset-4">View Selection</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex flex-row w-full md:w-auto gap-2 sm:gap-3">
-                <button onclick="sendWhatsApp()" class="flex-1 sm:min-w-[160px] bg-green-600 hover:bg-green-700 text-white px-4 py-3 sm:py-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all active:scale-[0.98] shadow-lg shadow-green-600/10 whitespace-nowrap">
-                    <svg class="w-4 h-4 mr-2 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                    WhatsApp
-                </button>
-                <button onclick="sendEmail()" class="flex-1 sm:min-w-[160px] bg-brand hover:opacity-90 text-white px-4 py-3 sm:py-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center transition-all active:scale-[0.98] shadow-lg shadow-brand/20 whitespace-nowrap">
-                    <svg class="w-4 h-4 mr-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                    Email Quote
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const SHEET_ID = '1_AvwvVEFlmxadelY73dG6u1QP1LCKLzEnz3EzWcvlMQ';
-        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=Live`;
-
-        let inventoryData = [];
-        let selectedItems = new Map();
-        let expandedCategories = new Set(); // Track which categories are expanded
-        let activeCategory = 'all';
-        let searchQuery = '';
-
-        function initTheme() {
-            if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-
-        function toggleDarkMode() {
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.theme = 'light';
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.theme = 'dark';
-            }
-        }
-
-        function parseCSV(text) {
-            const rows = [];
-            let row = [];
-            let cur = '';
-            let inQuote = false;
-            for (let i = 0; i < text.length; i++) {
-                let char = text[i];
-                let next = text[i + 1];
-                if (char === '"' && inQuote && next === '"') { cur += '"'; i++; }
-                else if (char === '"') { inQuote = !inQuote; }
-                else if (char === ',' && !inQuote) { row.push(cur.trim()); cur = ''; }
-                else if ((char === '\r' || char === '\n') && !inQuote) {
-                    row.push(cur.trim());
-                    if (row.length > 0) rows.push(row);
-                    row = []; cur = '';
-                    if (char === '\r' && next === '\n') i++;
-                } else { cur += char; }
-            }
-            if (cur !== '' || row.length > 0) { row.push(cur.trim()); rows.push(row); }
-            return rows;
-        }
-
-        async function fetchInventory() {
-            try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                const rows = parseCSV(csvText);
-                const headers = rows[0].map(h => h.toLowerCase().trim());
-                const catIdx = headers.indexOf('category');
-                const descIdx = headers.indexOf('description');
-                const qtyIdx = headers.indexOf('qty');
-
-                const rawItems = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length <= Math.max(catIdx, descIdx)) continue;
-                    const category = row[catIdx];
-                    const description = row[descIdx];
-                    const qty = (qtyIdx !== -1 && row[qtyIdx]) ? row[qtyIdx] : '1';
-                    if (category && description && isNaN(category)) {
-                        rawItems.push({ category, name: description, qty });
-                    }
-                }
-
-                const groups = {};
-                rawItems.forEach(item => {
-                    if (!groups[item.category]) {
-                        groups[item.category] = {
-                            id: item.category.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-                            category: item.category,
-                            items: []
-                        };
-                    }
-                    groups[item.category].items.push({ name: item.name, qty: item.qty });
-                });
-
-                inventoryData = Object.values(groups);
-                populateDropdown();
-                renderInventory();
-            } catch (error) {
-                console.error('Fetch error:', error);
-            }
-        }
-
-        function populateDropdown() {
-            const select = document.getElementById('category-select');
-            const categoryOptions = inventoryData.map(cat => `<option value="${cat.id}">${cat.category}</option>`).join('');
-            if(select) select.innerHTML = '<option value="all">All Categories</option>' + categoryOptions;
-        }
-
-        /**
-         * Handle Search Input with Suggestions Dropdown
-         */
-        function handleSearch(val) {
-            searchQuery = val;
-            const dropdown = document.getElementById('search-results-dropdown');
-            
-            if (!val.trim()) {
-                dropdown.classList.add('hidden');
-                renderInventory();
-                return;
-            }
-
-            const normalizedQuery = val.toLowerCase().replace(/\s+/g, '');
-            const matches = [];
-            
-            inventoryData.forEach(cat => {
-                cat.items.forEach(item => {
-                    const normalizedItemName = item.name.toLowerCase().replace(/\s+/g, '');
-                    if (normalizedItemName.includes(normalizedQuery)) {
-                        matches.push({ ...item, category: cat.category, catId: cat.id });
-                    }
-                });
-            });
-
-            if (matches.length > 0) {
-                dropdown.classList.remove('hidden');
-                
-                let html = `
-                    <button onclick="showAllSearchResults()" class="w-full text-left px-4 py-3 bg-brand/5 dark:bg-blue-500/10 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between hover:bg-brand/10 dark:hover:bg-blue-500/20 transition-colors">
-                        <span class="text-xs font-black uppercase text-brand dark:text-blue-400">Show all containing "${val}"</span>
-                        <svg class="w-4 h-4 text-brand dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                    </button>
-                `;
-
-                html += matches.slice(0, 10).map(match => `
-                    <button onclick="selectFromDropdown('${match.name.replace(/'/g, "\\'")}', '${match.qty}', '${match.catId}')" 
-                            class="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors border-b border-slate-50 dark:border-slate-800/50 last:border-0">
-                        <div class="min-w-0 pr-2">
-                            <p class="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">${match.name}</p>
-                            <p class="text-[10px] text-slate-400 font-medium uppercase">${match.category}</p>
-                        </div>
-                        <span class="text-[10px] font-black text-brand dark:text-blue-400">SELECT</span>
-                    </button>
-                `).join('');
-
-                dropdown.innerHTML = html;
-            } else {
-                dropdown.innerHTML = '<div class="px-4 py-6 text-center text-slate-400 text-sm">No matches found.</div>';
-                dropdown.classList.remove('hidden');
-            }
-        }
-
-        function showAllSearchResults() {
-            document.getElementById('search-results-dropdown').classList.add('hidden');
-            // Auto-expand all categories when showing search results
-            inventoryData.forEach(cat => expandedCategories.add(cat.id));
-            renderInventory();
-        }
-
-        function selectFromDropdown(name, qty, catId) {
-            expandedCategories.add(catId); // Ensure category is open to see selection
-            toggleItem('', name, qty);
-            document.getElementById('gear-search').value = '';
-            searchQuery = '';
-            document.getElementById('search-results-dropdown').classList.add('hidden');
-        }
-
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('search-results-dropdown');
-            const searchInput = document.getElementById('gear-search');
-            if (dropdown && !dropdown.contains(e.target) && e.target !== searchInput) {
-                dropdown.classList.add('hidden');
-            }
-        });
-
-        function setActiveCategory(id) {
-            activeCategory = id;
-            if (id !== 'all') {
-                expandedCategories.add(id); // Automatically expand if chosen from dropdown
-            }
-            renderInventory();
-            if (id !== 'all' && !searchQuery) {
-                const target = document.getElementById(`section-${id}`);
-                if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.pageYOffset - 180, behavior: 'smooth' });
-            }
-        }
-
-        function toggleCategoryExpansion(catId) {
-            if (expandedCategories.has(catId)) {
-                expandedCategories.delete(catId);
-            } else {
-                expandedCategories.add(catId);
-            }
-            renderInventory();
-        }
-
-        function toggleCategory(event, catId) {
-            event.stopPropagation(); // Prevent toggling expansion when clicking "Select All"
-            const category = inventoryData.find(c => c.id === catId);
-            if (!category) return;
-            const allNames = category.items.map(i => i.name);
-            const allSelected = allNames.every(name => selectedItems.has(name));
-            if (allSelected) {
-                allNames.forEach(name => selectedItems.delete(name));
-            } else {
-                category.items.forEach(i => selectedItems.set(i.name, i.qty));
-            }
-            renderInventory();
-            updateInquiryBar();
-        }
-
-        function toggleItem(id, name, qty) {
-            if (selectedItems.has(name)) {
-                selectedItems.delete(name);
-            } else {
-                selectedItems.set(name, qty);
-            }
-            updateInquiryBar();
-            renderInventory(); 
-        }
-
-        function updateInquiryBar() {
-            const bar = document.getElementById('inquiry-bar');
-            const countEl = document.getElementById('selected-count');
-            if(countEl) countEl.textContent = selectedItems.size;
-            if(bar) {
-                if (selectedItems.size > 0) bar.classList.add('visible');
-                else bar.classList.remove('visible');
-            }
-        }
-
-        function openPreview() {
-            const modal = document.getElementById('preview-modal');
-            const list = document.getElementById('preview-list');
-            modal.classList.replace('hidden', 'visible');
-            
-            if (selectedItems.size === 0) {
-                list.innerHTML = '<p class="text-center text-slate-400 py-10">Your list is empty.</p>';
-                return;
-            }
-
-            list.innerHTML = Array.from(selectedItems).map(([name, qty]) => `
-                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                    <div class="min-w-0 pr-4">
-                        <p class="text-sm font-bold text-slate-800 dark:text-white leading-tight">${name}</p>
-                        <span class="text-[10px] font-black text-slate-400 uppercase">Quantity: ${qty}</span>
-                    </div>
-                    <button onclick="removeFromPreview('${name.replace(/'/g, "\\'")}')" class="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function closePreview() {
-            document.getElementById('preview-modal').classList.replace('visible', 'hidden');
-        }
-
-        function removeFromPreview(name) {
-            selectedItems.delete(name);
-            openPreview();
-            updateInquiryBar();
-            renderInventory();
-            if (selectedItems.size === 0) closePreview();
-        }
-
-        function clearSelection() {
-            selectedItems.clear();
-            updateInquiryBar();
-            renderInventory(); 
-            closePreview();
-        }
-
-        function renderInventory() {
-            const container = document.getElementById('inventory-container');
-            const normalizedQuery = searchQuery.toLowerCase().replace(/\s+/g, '');
-
-            const filteredData = inventoryData
-                .filter(cat => activeCategory === 'all' || cat.id === activeCategory)
-                .map(cat => {
-                    const filteredItems = cat.items.filter(item => {
-                        if (!searchQuery) return true;
-                        return item.name.toLowerCase().replace(/\s+/g, '').includes(normalizedQuery);
-                    });
-                    return { ...cat, items: filteredItems };
-                })
-                .filter(cat => cat.items.length > 0);
-
-            if (filteredData.length === 0) {
-                container.innerHTML = `<div class="text-center py-20 text-slate-400 italic">No gear matches your search.</div>`;
-                return;
-            }
-
-            container.innerHTML = filteredData.map((cat) => {
-                const isExpanded = expandedCategories.has(cat.id);
-                const allSelected = cat.items.every(i => selectedItems.has(i.name));
-                
-                return `
-                <section id="section-${cat.id}" class="px-0 sm:px-1">
-                    <div onclick="toggleCategoryExpansion('${cat.id}')" class="flex items-center justify-between mb-2 sm:mb-4 border-b border-slate-100 dark:border-slate-800 py-3 cursor-pointer group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-900/50 rounded-xl sm:px-2">
-                        <div class="flex items-center space-x-3 min-w-0 pr-2">
-                            <!-- Toggle Chevron -->
-                            <svg class="w-5 h-5 text-slate-400 dark:text-slate-600 group-hover:text-brand transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                            <div class="min-w-0">
-                                <h3 class="text-base sm:text-2xl font-extrabold text-slate-900 dark:text-white transition-colors break-words">${cat.category}</h3>
-                                <span class="text-[8px] sm:text-[10px] font-black text-brand dark:text-blue-400 uppercase bg-brand/5 dark:bg-brand/20 px-1.5 py-0.5 rounded transition-colors">${cat.items.length} Items</span>
-                            </div>
-                        </div>
-                        <button onclick="toggleCategory(event, '${cat.id}')" class="px-2 py-1.5 rounded-lg border text-[10px] font-black uppercase transition-all active:scale-95 whitespace-nowrap ${allSelected ? 'bg-brand border-brand text-white dark:bg-blue-600 dark:border-blue-600' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:border-brand/40'}">
-                            ${allSelected ? 'Clear' : 'Select All'}
-                        </button>
-                    </div>
-                    
-                    <div class="${isExpanded ? 'grid' : 'hidden'} grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 pb-6 animate-in slide-in-from-top-2 duration-200">
-                        ${cat.items.map((item, itemIdx) => {
-                            const isChecked = selectedItems.has(item.name);
-                            return `
-                                <div class="relative">
-                                    <input type="checkbox" id="item-${cat.id}-${itemIdx}" class="hidden" ${isChecked ? 'checked' : ''} onchange="toggleItem('item-${cat.id}-${itemIdx}', '${item.name.replace(/'/g, "\\'")}', '${item.qty}')">
-                                    <label for="item-${cat.id}-${itemIdx}" class="item-card flex items-center justify-between p-2.5 sm:p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg sm:rounded-2xl cursor-pointer hover:border-brand/30 h-full transition-all transition-colors">
-                                        <div class="flex items-center space-x-1.5 sm:space-x-4 flex-1 min-w-0">
-                                            <div class="check-icon transition-all shrink-0 
-                                                ${isChecked ? 'opacity-100 scale-100 text-brand dark:text-blue-400' : 'opacity-20 scale-100 text-slate-400 dark:text-slate-600'}">
-                                                <svg class="w-3.5 h-3.5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                            </div>
-                                            <span class="text-[12.5px] sm:text-[15px] font-bold text-slate-800 dark:text-slate-200 leading-tight break-words text-left transition-colors">${item.name}</span>
-                                        </div>
-                                        <div class="text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded ml-1 transition-colors">x${item.qty}</div>
-                                    </label>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </section>
-                `;
-            }).join('');
-        }
-
-        function generateListString() {
-            return Array.from(selectedItems).map(([name]) => name).join('%0A• ');
-        }
-
-        function sendWhatsApp() {
-            if (selectedItems.size === 0) return;
-            const list = generateListString();
-            const message = `*Polar Bear Films - Gear Inquiry*%0A%0AHello Himanshu, I'm interested in renting the following items:%0A%0A• ${list}%0A%0APlease share availability and a quote for these.`;
-            window.open(`https://wa.me/919650563719?text=${message}`, '_blank');
-        }
-
-        function sendEmail() {
-            if (selectedItems.size === 0) return;
-            const list = Array.from(selectedItems).map(([name]) => name).join('%0D%0A• ');
-            const subject = "Rental Inquiry: Polar Bear Films Inventory";
-            const body = `Dear Polar Bear Films Team,%0D%0A%0D%0AI am reaching out to inquire about the following equipment availability:%0D%0A%0D%0A• ${list}%0D%0A%0D%0APlease let me know the rental rates for these items for my upcoming project.%0D%0A%0D%0ABest regards.`;
-            window.location.href = `mailto:himanshusharma280@gmail.com?subject=${subject}&body=${body}`;
-        }
-
-        window.onload = () => { initTheme(); fetchInventory(); };
-    </script>
-</body>
-</html>
+  );
+}
