@@ -735,22 +735,30 @@
         // --- Communication Logic ---
         function generateListString(isHtml = false) {
             const separator = isHtml ? '%0D%0A' : '%0A';
-            
-            // Group items by category
-            const grouped = {};
-            for (const [name, detail] of state.selected.entries()) {
-                if (!grouped[detail.categoryTitle]) {
-                    grouped[detail.categoryTitle] = [];
-                }
-                grouped[detail.categoryTitle].push(`  • ${name} (x${detail.qty})`);
-            }
-
-            // Build string
             const result = [];
-            for (const category of Object.keys(grouped).sort()) {
-                result.push(`*${category}*`);
-                result.push(...grouped[category]);
-                result.push(''); // blank line
+
+            // Sort categories alphabetically to maintain consistent order
+            const sortedCategories = [...state.inventoryData].sort((a, b) => a.title.localeCompare(b.title));
+
+            for (const category of sortedCategories) {
+                // Find selected items belonging to this specific category
+                const selectedInCategory = category.items.filter(item => state.selected.has(item.name));
+                
+                if (selectedInCategory.length === 0) continue;
+
+                result.push(`*${category.title}*`);
+                
+                // If the number of selected items matches the total items in the category
+                if (selectedInCategory.length === category.items.length) {
+                    result.push(`  • All`);
+                } else {
+                    // Otherwise, list them out individually
+                    selectedInCategory.forEach(item => {
+                        const detail = state.selected.get(item.name);
+                        result.push(`  • ${item.name} (x${detail.qty})`);
+                    });
+                }
+                result.push(''); // blank line spacing
             }
             
             return result.join(separator).trim();
