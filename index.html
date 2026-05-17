@@ -113,17 +113,6 @@
             </div>
             
             <div class="flex items-center space-x-2 sm:space-x-4">
-                <!-- Mobile Cart Icon -->
-                <button 
-                    id="header-cart-btn"
-                    onclick="openPreviewModal()" 
-                    class="relative p-2.5 sm:hidden rounded-xl bg-brand/10 dark:bg-blue-500/20 text-brand dark:text-blue-400 hover:bg-brand/20 dark:hover:bg-blue-500/30 transition-colors flex items-center justify-center"
-                    aria-label="View Cart"
-                >
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                    <span id="header-cart-badge" class="absolute -top-1.5 -right-1.5 bg-red-500 border-2 border-white dark:border-slate-950 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-full transition-transform duration-300 scale-0 shadow-sm">0</span>
-                </button>
-
                 <button 
                     onclick="toggleTheme()" 
                     class="p-2 sm:p-2.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors"
@@ -230,6 +219,14 @@
         <script>document.getElementById('copyright-text').textContent = `© ${new Date().getFullYear()} POLAR BEAR FILMS PRIVATE LIMITED`;</script>
     </footer>
 
+    <!-- Floating Mobile Cart (Draggable) -->
+    <div id="floating-cart-wrapper" class="fixed sm:hidden z-[50] bottom-6 right-6 touch-none transition-transform duration-300 scale-0 origin-center">
+        <button id="floating-cart-btn" class="w-14 h-14 bg-[#110086] dark:bg-blue-600 text-white rounded-full shadow-2xl shadow-[#110086]/30 flex items-center justify-center relative cursor-pointer active:scale-95 transition-transform duration-200">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            <span id="floating-cart-badge" class="absolute -top-1 -right-1 bg-red-500 border-2 border-white dark:border-slate-900 text-white text-[10px] font-black w-6 h-6 flex items-center justify-center rounded-full">0</span>
+        </button>
+    </div>
+
     <!-- Checkout Bar (Desktop Only) -->
     <div id="checkout-bar" class="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 pointer-events-none hidden-bar max-sm:hidden">
         <div class="max-w-4xl mx-auto bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-3xl shadow-[0_20px_40px_-10px_rgba(17,0,134,0.15)] dark:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between sm:gap-4 pointer-events-auto transition-all duration-300">
@@ -322,7 +319,8 @@
             categorySelect: document.getElementById('category-select'),
             checkoutBar: document.getElementById('checkout-bar'),
             selectedCount: document.getElementById('selected-count'),
-            headerCartBadge: document.getElementById('header-cart-badge'),
+            floatingCartWrapper: document.getElementById('floating-cart-wrapper'),
+            floatingCartBadge: document.getElementById('floating-cart-badge'),
             previewModal: document.getElementById('preview-modal'),
             modalOverlay: document.getElementById('modal-overlay'),
             modalCount: document.getElementById('modal-count'),
@@ -572,15 +570,19 @@
             // Desktop floating bar updates
             if (DOM.selectedCount) DOM.selectedCount.textContent = count;
             
-            // Mobile header cart updates
-            if (DOM.headerCartBadge) {
-                DOM.headerCartBadge.textContent = count;
+            // Mobile floating cart updates
+            if (DOM.floatingCartBadge) {
+                DOM.floatingCartBadge.textContent = count;
+            }
+
+            // Show/Hide Floating Mobile Cart
+            if (DOM.floatingCartWrapper) {
                 if (count > 0) {
-                    DOM.headerCartBadge.classList.remove('scale-0');
-                    DOM.headerCartBadge.classList.add('scale-100');
+                    DOM.floatingCartWrapper.classList.remove('scale-0');
+                    DOM.floatingCartWrapper.classList.add('scale-100');
                 } else {
-                    DOM.headerCartBadge.classList.add('scale-0');
-                    DOM.headerCartBadge.classList.remove('scale-100');
+                    DOM.floatingCartWrapper.classList.add('scale-0');
+                    DOM.floatingCartWrapper.classList.remove('scale-100');
                 }
             }
             
@@ -593,6 +595,55 @@
                 DOM.checkoutBar.classList.remove('visible-bar');
             }
         }
+
+        // --- Floating Cart Drag Logic ---
+        let isDragging = false;
+        let dragStartX, dragStartY, startLeft, startTop;
+
+        if (DOM.floatingCartWrapper) {
+            DOM.floatingCartWrapper.addEventListener('touchstart', (e) => {
+                isDragging = false;
+                const touch = e.touches[0];
+                dragStartX = touch.clientX;
+                dragStartY = touch.clientY;
+                
+                const rect = DOM.floatingCartWrapper.getBoundingClientRect();
+                startLeft = rect.left;
+                startTop = rect.top;
+            }, { passive: true });
+
+            DOM.floatingCartWrapper.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const dx = touch.clientX - dragStartX;
+                const dy = touch.clientY - dragStartY;
+
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+                    isDragging = true;
+                    e.preventDefault(); // Prevent scrolling while dragging
+                    
+                    let newLeft = startLeft + dx;
+                    let newTop = startTop + dy;
+                    
+                    const maxLeft = window.innerWidth - DOM.floatingCartWrapper.offsetWidth;
+                    const maxTop = window.innerHeight - DOM.floatingCartWrapper.offsetHeight;
+                    
+                    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+                    newTop = Math.max(0, Math.min(newTop, maxTop));
+                    
+                    DOM.floatingCartWrapper.style.left = `${newLeft}px`;
+                    DOM.floatingCartWrapper.style.top = `${newTop}px`;
+                    DOM.floatingCartWrapper.style.right = 'auto';
+                    DOM.floatingCartWrapper.style.bottom = 'auto';
+                }
+            }, { passive: false });
+
+            DOM.floatingCartWrapper.addEventListener('touchend', (e) => {
+                if (!isDragging) {
+                    openPreviewModal();
+                }
+            });
+        }
+
 
         // --- Search Handling ---
         DOM.searchInput.addEventListener('input', (e) => {
